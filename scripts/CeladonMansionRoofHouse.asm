@@ -12,10 +12,10 @@ CeladonMansion5Text1:
 
 CeladonMansion5Text2:
 	text_asm
-	lb bc, EEVEE, 25
+	lb bc, MEW, 25
 	call GivePokemon
 	jr nc, .party_full
-	ld a, HS_CELADON_MANSION_EEVEE_GIFT
+	ld a, HS_CELADON_MANSION_MEW_GIFT
 	ld [wMissableObjectIndex], a
 	predef HideObject
 .party_full
