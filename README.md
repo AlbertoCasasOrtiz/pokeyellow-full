@@ -1,6 +1,6 @@
 # Pokémon Yellow [![Build Status][ci-badge]][ci]
 
-This is a disassembly of Pokémon Yellow.
+This is a disassembly of Pokémon Yellow. I have modified it so you can capture absolute every 151 pokemon without trading.
 
 It builds the following ROMs:
 
