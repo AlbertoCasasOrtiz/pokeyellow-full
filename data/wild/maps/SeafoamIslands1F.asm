@@ -6,7 +6,7 @@ SeafoamIslands1FWildMons:
 	db 27, ZUBAT
 	db 36, ZUBAT
 	db 28, SLOWPOKE
-	db 30, SLOWPOKE
+	db 30, JYNX
 	db  9, ZUBAT
 	db 27, GOLBAT
 	db 36, GOLBAT
