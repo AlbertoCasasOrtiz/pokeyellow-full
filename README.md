@@ -10,12 +10,7 @@ It builds the following ROMs:
 To set up the repository, see [**INSTALL.md**](INSTALL.md).
 
 
-## See also
-
-- **Discord:** [pret][discord]
-- **IRC:** [libera#pret][irc]
-
-Other disassembly projects:
+## See also the following repositories by pret
 
 - [**Pokémon Red/Blue**][pokered]
 - [**Pokémon Gold/Silver**][pokegold]
