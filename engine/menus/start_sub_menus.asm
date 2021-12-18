@@ -177,7 +177,7 @@ StartMenu_Pokemon::
 	ld a, $2
 .continue
 	ld [wd473], a
-	ld a, SURFBOARD
+	ld a, BOARD
 	ld [wcf91], a
 	ld [wPseudoItemID], a
 	call UseItem

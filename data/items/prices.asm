@@ -6,7 +6,7 @@ ItemPrices::
 	bcd3 200   ; POKE_BALL
 	bcd3 0     ; TOWN_MAP
 	bcd3 0     ; BICYCLE
-	bcd3 0     ; SURFBOARD
+	bcd3 1000  ; BOARD
 	bcd3 1000  ; SAFARI_BALL
 	bcd3 0     ; POKEDEX
 	bcd3 0     ; MOON_STONE
