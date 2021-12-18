@@ -634,7 +634,7 @@ KadabraEvosMoves:
 
 GravelerEvosMoves:
 ; Evolutions
-	db EV_LEVEL, 60, GOLEM
+	db EV_LEVEL, 45, GOLEM
 	db 0
 ; Learnset
 	db 11, DEFENSE_CURL
@@ -660,7 +660,7 @@ ChanseyEvosMoves:
 
 MachokeEvosMoves:
 ; Evolutions
-	db EV_LEVEL, 60, MACHAMP
+	db EV_LEVEL, 45, MACHAMP
 	db 0
 ; Learnset
 	db 20, LOW_KICK
