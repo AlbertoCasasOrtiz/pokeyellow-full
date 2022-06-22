@@ -317,7 +317,7 @@ MainInBattleLoop:
 	and a
 	ret nz ; return if pokedoll was used to escape from battle
 	ld a, [wBattleMonStatus]
-	and (1 << FRZ) | SLP ; is mon frozen or asleep?
+	and (1 << FRZ) | SLP_MASK
 	jr nz, .selectEnemyMove ; if so, jump
 	ld a, [wPlayerBattleStatus1]
 	and (1 << STORING_ENERGY) | (1 << USING_TRAPPING_MOVE) ; check player is using Bide or using a multi-turn attack like wrap
@@ -3103,7 +3103,7 @@ SelectEnemyMove:
 	and (1 << CHARGING_UP) | (1 << THRASHING_ABOUT) ; using a charging move or thrash/petal dance
 	ret nz
 	ld a, [wEnemyMonStatus]
-	and SLP | 1 << FRZ ; sleeping or frozen
+	and (1 << FRZ) | SLP_MASK
 	ret nz
 	ld a, [wEnemyBattleStatus1]
 	and (1 << USING_TRAPPING_MOVE) | (1 << STORING_ENERGY) ; using a trapping move like wrap or bide
@@ -3192,6 +3192,7 @@ LinkBattleExchangeData:
 	ld a, b
 .doExchange
 	ld [wSerialExchangeNybbleSendData], a
+	vc_hook Wireless_start_exchange
 	callfar PrintWaitingText
 .syncLoop1
 	call Serial_ExchangeNybble
@@ -3199,18 +3200,33 @@ LinkBattleExchangeData:
 	ld a, [wSerialExchangeNybbleReceiveData]
 	inc a
 	jr z, .syncLoop1
+	vc_hook Wireless_end_exchange
+	vc_patch Wireless_net_delay_1
+IF DEF(_YELLOW_VC)
+	ld b, 26
+ELSE
 	ld b, 10
+ENDC
+	vc_patch_end
 .syncLoop2
 	call DelayFrame
 	call Serial_ExchangeNybble
 	dec b
 	jr nz, .syncLoop2
+	vc_hook Wireless_start_send_zero_bytes
+	vc_patch Wireless_net_delay_2
+IF DEF(_YELLOW_VC)
+	ld b, 26
+ELSE
 	ld b, 10
+ENDC
+	vc_patch_end
 .syncLoop3
 	call DelayFrame
 	call Serial_SendZeroByte
 	dec b
 	jr nz, .syncLoop3
+	vc_hook Wireless_end_send_zero_bytes
 	ret
 
 ExecutePlayerMove:
@@ -3428,7 +3444,7 @@ PrintGhostText:
 	and a
 	jr nz, .Ghost
 	ld a, [wBattleMonStatus] ; player's turn
-	and SLP | (1 << FRZ)
+	and (1 << FRZ) | SLP_MASK
 	ret nz
 	ld hl, ScaredText
 	call PrintText
@@ -3455,7 +3471,7 @@ IsGhostBattle:
 	ld a, [wCurMap]
 	cp POKEMON_TOWER_1F
 	jr c, .next
-	cp MR_FUJIS_HOUSE
+	cp POKEMON_TOWER_7F + 1
 	jr nc, .next
 	ld b, SILPH_SCOPE
 	call IsItemInBag
@@ -3470,7 +3486,7 @@ IsGhostBattle:
 CheckPlayerStatusConditions:
 	ld hl, wBattleMonStatus
 	ld a, [hl]
-	and SLP ; sleep mask
+	and SLP_MASK
 	jr z, .FrozenCheck
 ; sleeping
 	dec a
@@ -4182,7 +4198,7 @@ CheckForDisobedience:
 	call BattleRandom
 	add a
 	swap a
-	and SLP ; sleep mask
+	and SLP_MASK
 	jr z, .monNaps ; keep trying until we get at least 1 turn of sleep
 	ld [wBattleMonStatus], a
 	ld hl, BeganToNapText
@@ -5526,7 +5542,7 @@ MoveHitTest:
 	cp DREAM_EATER_EFFECT
 	jr nz, .swiftCheck
 	ld a, [bc]
-	and SLP ; is the target pokemon sleeping?
+	and SLP_MASK
 	jp z, .moveMissed
 .swiftCheck
 	ld a, [de]
@@ -5960,7 +5976,7 @@ ExecuteEnemyMoveDone:
 CheckEnemyStatusConditions:
 	ld hl, wEnemyMonStatus
 	ld a, [hl]
-	and SLP ; sleep mask
+	and SLP_MASK
 	jr z, .checkIfFrozen
 	dec a ; decrement number of turns left
 	ld [wEnemyMonStatus], a
@@ -6844,7 +6860,14 @@ BattleRandom:
 	ld a, [hl]
 	pop bc
 	pop hl
+	vc_hook Unknown_BattleRandom_ret_c
+	vc_patch BattleRandom_ret
+IF DEF(_YELLOW_VC)
+	ret
+ELSE
 	ret c
+ENDC
+	vc_patch_end
 
 ; if we picked the last seed, we need to recalculate the nine seeds
 	push hl

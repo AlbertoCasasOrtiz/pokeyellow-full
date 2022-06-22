@@ -3,9 +3,19 @@ _CableClubNPCPleaseWaitText::
 	text_end
 
 _CableClubNPCLinkClosedBecauseOfInactivityText::
+	vc_patch Change_link_closed_inactivity_message
+IF DEF(_YELLOW_VC)
+	text "Please come again!"
+	done
+	text_start
+	text "sed because of"
+	cont "inactivity."
+ELSE
 	text "The link has been"
 	line "closed because of"
 	cont "inactivity."
+ENDC
+	vc_patch_end
 
 	para "Please contact"
 	line "your friend and"
