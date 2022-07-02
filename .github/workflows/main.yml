@@ -72,3 +72,9 @@ jobs:
           cwd: "./symbols"
           add: "*.sym"
           message: ${{ github.event.commits[0].message }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: pokeyellow.gbc
+          path: pokeyellow.gbc
