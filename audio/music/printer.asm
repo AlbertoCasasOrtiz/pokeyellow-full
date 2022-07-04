@@ -31,25 +31,16 @@ Music_GBPrinter_Ch3::
 	note F#, 1
 	rest 1
 .loop
+	note D_, 1
+	note E_, 2
+	note E_, 2
+	note E_, 2
 	note E_, 1
-	rest 1
-	note B_, 1
-	rest 1
 	note E_, 1
-	rest 1
-	note B_, 1
-	rest 1
-	note E_, 1
-	rest 1
-	note B_, 1
-	rest 1
-	note E_, 1
-	rest 1
-	note B_, 1
-	rest 1
-	note E_, 1
-	rest 1
-	note B_, 1
+	note E_, 2
+	note D_, 1
+	note C_, 1
+	note C_, 3
 	rest 1
 	note E_, 1
 	rest 1
