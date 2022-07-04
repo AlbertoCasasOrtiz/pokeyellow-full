@@ -19,10 +19,12 @@ Music_GBPrinter_Ch3::
 	note D_, 1
         note D_, 3
         note C_, 1
+	octave 3
         note B_, 1
         note A_, 4
 
-	note A_, 1
+        note A_, 1
+	octave 4
 	note E_, 1
 	note E_, 1
 	note E_, 1
