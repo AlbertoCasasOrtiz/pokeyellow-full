@@ -1,0 +1,33 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: install dependencies
+      run: sudo apt-get install make gcc git bison
+    - name: download rgbds
+      run: wget https://github.com/gbdev/rgbds/archive/refs/tags/v0.5.2.tar.gz
+    - name: unzip rgdbs
+      run: tar xvzf v0.5.2.tar.gz
+    - name: build and install rgdbs
+      run: |
+           cd rgbds-0.5.2
+           make
+           sudo make install
+           cd ..
+    - name: make pokeyellow
+      run: make
+    - name: Upload opensim-core
+      uses: actions/upload-artifact@v4
+      with:
+        name: pokeyellow.gbc
+        path: pokeyellow.gbc
