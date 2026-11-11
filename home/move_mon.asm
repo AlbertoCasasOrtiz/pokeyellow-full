@@ -94,7 +94,7 @@ CalcStat::
 	srl c
 	pop hl
 	push bc
-	ld bc, wPartyMon1DVs - (wPartyMon1HPExp - 1) ; also wEnemyMonDVs - wEnemyMonHP
+	ld bc, MON_DVS - (MON_HP_EXP - 1)
 	add hl, bc
 	pop bc
 	ld a, c
@@ -106,7 +106,7 @@ CalcStat::
 	jr z, .getSpeedIV
 	cp $5
 	jr z, .getSpecialIV
-.getHpIV
+; get HP IV
 	push bc
 	ld a, [hl]  ; Atk IV
 	swap a
@@ -172,7 +172,7 @@ CalcStat::
 	ldh [hMultiplicand+1], a
 	xor a
 	ldh [hMultiplicand], a
-	ld a, [wCurEnemyLVL]
+	ld a, [wCurEnemyLevel]
 	ldh [hMultiplier], a
 	call Multiply            ; ((Base + IV) * 2 + ceil(Sqrt(stat exp)) / 4) * Level
 	ldh a, [hMultiplicand]
@@ -190,7 +190,7 @@ CalcStat::
 	cp $1
 	ld a, 5 ; + 5 for non-HP stat
 	jr nz, .notHPStat
-	ld a, [wCurEnemyLVL]
+	ld a, [wCurEnemyLevel]
 	ld b, a
 	ldh a, [hMultiplicand+2]
 	add b

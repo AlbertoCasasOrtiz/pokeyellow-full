@@ -11,10 +11,10 @@
 _InitMapSprites::
 	call InitOutsideMapSprites
 	ret c ; return if the map is an outside map (already handled by above call)
-; if the map is an inside map (i.e. mapID >= $25)
+; if the map is an inside map (i.e. mapID >= FIRST_INDOOR_MAP)
 	call LoadSpriteSetFromMapHeader
 	call LoadMapSpriteTilePatterns
-	call Func_14150
+	call LoadMapSpritesImageBaseOffset
 	ret
 
 ; Loads sprite set for outside maps (cities and routes) and sets VRAM slots.
@@ -27,7 +27,7 @@ InitOutsideMapSprites:
 ; if so, choose the appropriate one
 	ld b, a ; b = spriteSetID
 	ld a, [wFontLoaded]
-	bit 0, a ; reloading upper half of tile patterns after displaying text?
+	bit BIT_FONT_LOADED, a ; reloading upper half of tile patterns after displaying text?
 	jr nz, .loadSpriteSet ; if so, forcibly reload the sprite set
 	ld a, [wSpriteSetID]
 	cp b ; has the sprite set ID changed?
@@ -38,15 +38,15 @@ InitOutsideMapSprites:
 	dec a
 	ld c, a
 	ld b, 0
-	ld a, (wSpriteSetID - wSpriteSet)
+	ld a, wSpriteSetID - wSpriteSet
 	ld hl, SpriteSets
 	call AddNTimes ; get sprite set offset
 	ld de, wSpriteSet
-	ld bc, (wSpriteSetID - wSpriteSet)
+	ld bc, wSpriteSetID - wSpriteSet
 	call CopyData ; copy it to wSpriteSet
 	call LoadMapSpriteTilePatterns
 .skipLoadingSpriteSet
-	call Func_14150
+	call LoadMapSpritesImageBaseOffset
 	scf
 	ret
 
@@ -59,7 +59,7 @@ LoadSpriteSetFromMapHeader:
 ; (since the Red sprite always has the first VRAM tile pattern slot and the
 ; Pikachu sprite reserves the second slot) is the VRAM tile pattern slot.
 	ld hl, wSpriteSet
-	ld bc, (wSpriteSetID - wSpriteSet)
+	ld bc, wSpriteSetID - wSpriteSet
 	xor a
 	call FillMemory
 	ld a, SPRITE_PIKACHU ; load Pikachu separately
@@ -73,14 +73,14 @@ LoadSpriteSetFromMapHeader:
 	jr z, .continue ; if the sprite slot is not used
 	ld c, a
 	call CheckForFourTileSprite ; is this a four tile sprite?
-	jr nc, .isFourTileSprite
+	jr nc, .isNotFourTileSprite
 ; loop through the space reserved for four tile picture IDs
 	ld de, wSpriteSet + 9
 	ld b, 2
 	call CheckIfPictureIDAlreadyLoaded
 	jr .continue
 
-.isFourTileSprite
+.isNotFourTileSprite
 ; loop through the space reserved for regular picture IDs
 	ld de, wSpriteSet
 	ld b, 9
@@ -170,7 +170,7 @@ ReloadWalkingTilePatterns:
 
 LoadStillTilePattern:
 	ld a, [wFontLoaded]
-	bit 0, a ; reloading upper half of tile patterns after displaying text?
+	bit BIT_FONT_LOADED, a ; reloading upper half of tile patterns after displaying text?
 	ret nz ; if so, skip loading data into the lower half
 	call ReadSpriteSheetData
 	ret nc
@@ -186,7 +186,7 @@ LoadWalkingTilePattern:
 	ld d, h
 	ld e, l
 	call GetSpriteVRAMAddress
-	set 3, h ; add $800 to hl
+	set 3, h ; add $800 ($80 tiles) to hl (1 << 3 == $8)
 	call CopyVideoDataAlternate
 	ret
 
@@ -205,19 +205,17 @@ GetSpriteVRAMAddress:
 	ret
 
 SpriteVRAMAddresses:
-; Equivalent to multiplying $C0 (number of bytes in 12 tiles) times the VRAM
-; slot and adding the result to $8000 (the VRAM base address).
-	dw vChars0 + $0c0
-	dw vChars0 + $180
-	dw vChars0 + $240
-	dw vChars0 + $300
-	dw vChars0 + $3c0
-	dw vChars0 + $480
-	dw vChars0 + $540
-	dw vChars0 + $600
-	dw vChars0 + $6c0
-	dw vChars0 + $780 ; 4-tile sprites
-	dw vChars0 + $7c0 ; 4-tile sprites
+	dw vChars0 + (1 * 12) tiles
+	dw vChars0 + (2 * 12) tiles
+	dw vChars0 + (3 * 12) tiles
+	dw vChars0 + (4 * 12) tiles
+	dw vChars0 + (5 * 12) tiles
+	dw vChars0 + (6 * 12) tiles
+	dw vChars0 + (7 * 12) tiles
+	dw vChars0 + (8 * 12) tiles
+	dw vChars0 + (9 * 12) tiles
+	dw vChars0 + (10 * 12) tiles ; 4-tile sprites
+	dw vChars0 + (10 * 12 + 4) tiles ; 4-tile sprites
 
 ReadSpriteSheetData:
 	ldh a, [hVRAMSlot]
@@ -249,7 +247,7 @@ ReadSpriteSheetData:
 	scf
 	ret
 
-Func_14150:
+LoadMapSpritesImageBaseOffset:
 	ld a, $1
 	ld [wSpritePlayerStateData2ImageBaseOffset], a ; vram slot for player
 	ld a, $2
@@ -261,9 +259,9 @@ Func_14150:
 	ld a, [hl] ; [x#SPRITESTATEDATA1_PICTUREID]
 	and a ; is the sprite unused?
 	jr z, .spriteUnused
-	call Func_14179
+	call GetSpriteImageBaseOffset
 	push hl
-	ld de, (wSpritePlayerStateData2ImageBaseOffset) - (wSpriteStateData1) ; $10e
+	ld de, wSpritePlayerStateData2ImageBaseOffset - wSpriteStateData1
 	add hl, de ; [x#SPRITESTATEDATA2_IMAGEBASEOFFSET]
 	ld [hl], a ; write offset
 	pop hl
@@ -275,7 +273,7 @@ Func_14150:
 	jr nz, .loop
 	ret
 
-Func_14179:
+GetSpriteImageBaseOffset:
 	push de
 	push bc
 	ld c, a  ; c = picture ID
@@ -304,11 +302,11 @@ GetSplitMapSpriteSetID:
 	ld hl, MapSpriteSets
 	add hl, de
 	ld a, [hl] ; a = spriteSetID
-	cp $f0 ; does the map have 2 sprite sets?
+	cp FIRST_SPLIT_SET - 1 ; does the map have 2 sprite sets?
 	ret c
 ; Chooses the correct sprite set ID depending on the player's position within
 ; the map for maps with two sprite sets.
-	cp $f8
+	cp SPLITSET_ROUTE_20
 	jr z, .route20
 	ld hl, SplitMapSpriteSets
 	and $0f
@@ -320,8 +318,8 @@ GetSplitMapSpriteSetID:
 	jr nc, .noCarry
 	inc h
 .noCarry
-	ld a, [hli] ; determines whether the map is split East/West or North/South
-	cp $01
+	ld a, [hli] ; whether the map is split EAST_WEST or NORTH_SOUTH
+	cp EAST_WEST
 	ld a, [hli] ; position of dividing line
 	ld b, a
 	jr z, .eastWestDivide
@@ -333,35 +331,39 @@ GetSplitMapSpriteSetID:
 .compareCoord
 	cp b
 	jr c, .loadSpriteSetID
-; if in the East side or South side
+; if in the east side or south side
 	inc hl
 .loadSpriteSetID
 	ld a, [hl]
 	ret
-; Uses sprite set $01 for West side and $0A for East side.
+; Uses sprite set SPRITESET_PALLET_VIRIDIAN for west side and SPRITESET_FUCHSIA for east side.
 ; Route 20 is a special case because the two map sections have a more complex
 ; shape instead of the map simply being split horizontally or vertically.
 .route20
 	ld hl, wXCoord
+	; Use SPRITESET_PALLET_VIRIDIAN if X < 43
 	ld a, [hl]
-	cp $2b
-	ld a, $01
+	cp 43
+	ld a, SPRITESET_PALLET_VIRIDIAN
 	ret c
+	; Use SPRITESET_FUCHSIA if X >= 62.
 	ld a, [hl]
-	cp $3e
-	ld a, $0a
+	cp 62
+	ld a, SPRITESET_FUCHSIA
 	ret nc
+	; If 55 <= X < 62, split Y at 8; else 43 <= X < 55, so split Y at 13
 	ld a, [hl]
-	cp $37
-	ld b, $08
+	cp 55
+	ld b, 8
 	jr nc, .next
-	ld b, $0d
+	ld b, 13
 .next
+	; Use SPRITESET_FUCHSIA if Y < split; else use SPRITESET_PALLET_VIRIDIAN
 	ld a, [wYCoord]
 	cp b
-	ld a, $0a
+	ld a, SPRITESET_FUCHSIA
 	ret c
-	ld a, $01
+	ld a, SPRITESET_PALLET_VIRIDIAN
 	ret
 
 INCLUDE "data/maps/sprite_sets.asm"

@@ -11,10 +11,10 @@ BattleTransition:
 ; Determine which OAM block is being used by the enemy trainer sprite (if there
 ; is one).
 	ld hl, wSpritePlayerStateData1ImageIndex
-	ldh a, [hSpriteIndexOrTextID] ; enemy trainer sprite index (0 if wild battle)
+	ldh a, [hSpriteIndex] ; enemy trainer sprite index (0 if wild battle)
 	ld c, a
 	ld b, 0
-	ld de, $10
+	ld de, SPRITESTATEDATA1_LENGTH
 .loop1
 	ld a, [hl]
 	cp $ff
@@ -26,7 +26,7 @@ BattleTransition:
 	jr nz, .loop1
 
 ; Clear OAM except for the blocks used by the player and enemy trainer sprites.
-	ld hl, wOAMBuffer + $10
+	ld hl, wShadowOAMSprite04
 	ld c, 9
 .loop2
 	ld a, b
@@ -35,13 +35,13 @@ BattleTransition:
 	jr z, .skip2 ; skip clearing the block if the enemy trainer is using it
 	push hl
 	push bc
-	ld bc, $10
+	ld bc, OBJ_SIZE * 4
 	xor a
 	call FillMemory
 	pop bc
 	pop hl
 .skip2
-	ld de, $10
+	ld de, OBJ_SIZE * 4
 	add hl, de
 	dec c
 	jr nz, .loop2
@@ -64,6 +64,12 @@ BattleTransition:
 	ld l, a
 	jp hl
 
+	const_def
+	const BIT_TRAINER_BATTLE_TRANSITION  ; 0
+	const BIT_STRONGER_BATTLE_TRANSITION ; 1
+	const BIT_DUNGEON_BATTLE_TRANSITION  ; 2
+DEF NUM_BATTLE_TRANSITION_BITS EQU const_value
+
 ; the three GetBattleTransitionID functions set the first
 ; three bits of c, which determines what transition animation
 ; to play at the beginning of a battle
@@ -71,6 +77,7 @@ BattleTransition:
 ; bit 1: set if enemy is at least 3 levels higher than player
 ; bit 2: set if dungeon map
 BattleTransitions:
+	table_width 2
 	dw BattleTransition_DoubleCircle      ; %000
 	dw BattleTransition_Spiral            ; %001
 	dw BattleTransition_Circle            ; %010
@@ -79,15 +86,16 @@ BattleTransitions:
 	dw BattleTransition_Shrink            ; %101
 	dw BattleTransition_VerticalStripes   ; %110
 	dw BattleTransition_Split             ; %111
+	assert_table_length 1 << NUM_BATTLE_TRANSITION_BITS
 
 GetBattleTransitionID_WildOrTrainer:
 	ld a, [wCurOpponent]
 	cp OPP_ID_OFFSET
 	jr nc, .trainer
-	res 0, c
+	res BIT_TRAINER_BATTLE_TRANSITION, c
 	ret
 .trainer
-	set 0, c
+	set BIT_TRAINER_BATTLE_TRANSITION, c
 	ret
 
 GetBattleTransitionID_CompareLevels:
@@ -96,24 +104,24 @@ GetBattleTransitionID_CompareLevels:
 	ld a, [hli]
 	or [hl]
 	jr nz, .notFainted
-	ld de, wPartyMon2 - (wPartyMon1 + 1)
+	ld de, PARTYMON_STRUCT_LENGTH - 1
 	add hl, de
 	jr .faintedLoop
 .notFainted
-	ld de, wPartyMon1Level - (wPartyMon1HP + 1)
+	ld de, MON_LEVEL - (MON_HP + 1)
 	add hl, de
 	ld a, [hl]
 	add $3
 	ld e, a
-	ld a, [wCurEnemyLVL]
+	ld a, [wCurEnemyLevel]
 	sub e
 	jr nc, .highLevelEnemy
-	res 1, c
+	res BIT_STRONGER_BATTLE_TRANSITION, c
 	ld a, 1
 	ld [wBattleTransitionSpiralDirection], a
 	ret
 .highLevelEnemy
-	set 1, c
+	set BIT_STRONGER_BATTLE_TRANSITION, c
 	xor a
 	ld [wBattleTransitionSpiralDirection], a
 	ret
@@ -129,7 +137,7 @@ GetBattleTransitionID_IsDungeonMap:
 	cp e
 	jr nz, .loop1
 .match
-	set 2, c
+	set BIT_DUNGEON_BATTLE_TRANSITION, c
 	ret
 .noMatch1
 	ld hl, DungeonMaps2
@@ -145,7 +153,7 @@ GetBattleTransitionID_IsDungeonMap:
 	cp d
 	jr nc, .match
 .noMatch2
-	res 2, c
+	res BIT_DUNGEON_BATTLE_TRANSITION, c
 	ret
 
 INCLUDE "data/maps/dungeon_maps.asm"
@@ -163,9 +171,9 @@ BattleTransition_BlackScreen:
 	ldh [rBGP], a
 	ldh [rOBP0], a
 	ldh [rOBP1], a
-	call UpdateGBCPal_BGP
-	call UpdateGBCPal_OBP0
-	call UpdateGBCPal_OBP1
+	call UpdateCGBPal_BGP
+	call UpdateCGBPal_OBP0
+	call UpdateCGBPal_OBP1
 	ret
 
 ; for non-dungeon trainer battles
@@ -329,7 +337,7 @@ BattleTransition_FlashScreen_:
 	cp 1
 	jr z, .done
 	ldh [rBGP], a
-	call UpdateGBCPal_BGP
+	call UpdateCGBPal_BGP
 	ld c, 2
 	call DelayFrames
 	jr .loop
@@ -339,18 +347,18 @@ BattleTransition_FlashScreen_:
 	ret
 
 BattleTransition_FlashScreenPalettes:
-	db %11111001
-	db %11111110
-	db %11111111
-	db %11111110
-	db %11111001
-	db %11100100
-	db %10010000
-	db %01000000
-	db %00000000
-	db %01000000
-	db %10010000
-	db %11100100
+	dc 3, 3, 2, 1
+	dc 3, 3, 3, 2
+	dc 3, 3, 3, 3
+	dc 3, 3, 3, 2
+	dc 3, 3, 2, 1
+	dc 3, 2, 1, 0
+	dc 2, 1, 0, 0
+	dc 1, 0, 0, 0
+	dc 0, 0, 0, 0
+	dc 1, 0, 0, 0
+	dc 2, 1, 0, 0
+	dc 3, 2, 1, 0
 	db 1 ; end
 
 ; used for low level trainer dungeon battles

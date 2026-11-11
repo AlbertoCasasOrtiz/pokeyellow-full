@@ -4,11 +4,11 @@ LoadMonData_::
 ;  1: enemymon
 ;  2: boxmon
 ;  3: daycaremon
-; Return monster id at wcf91 and its data at wLoadedMon.
+; Return monster id at wCurPartySpecies and its data at wLoadedMon.
 ; Also load base stats at wMonHeader for convenience.
 
 	ld a, [wDayCareMonSpecies]
-	ld [wcf91], a
+	ld [wCurPartySpecies], a
 	ld a, [wMonDataLocation]
 	cp DAYCARE_DATA
 	jr z, .GetMonHeader
@@ -18,12 +18,12 @@ LoadMonData_::
 	call GetMonSpecies
 
 .GetMonHeader
-	ld a, [wcf91]
-	ld [wd0b5], a ; input for GetMonHeader
+	ld a, [wCurPartySpecies]
+	ld [wCurSpecies], a
 	call GetMonHeader
 
 	ld hl, wPartyMons
-	ld bc, wPartyMon2 - wPartyMon1
+	ld bc, PARTYMON_STRUCT_LENGTH
 	ld a, [wMonDataLocation]
 	cp ENEMY_PARTY_DATA
 	jr c, .getMonEntry
@@ -31,9 +31,9 @@ LoadMonData_::
 	ld hl, wEnemyMons
 	jr z, .getMonEntry
 
-	cp 2
+	cp BOX_DATA
 	ld hl, wBoxMons
-	ld bc, wBoxMon2 - wBoxMon1
+	ld bc, BOXMON_STRUCT_LENGTH
 	jr z, .getMonEntry
 
 	ld hl, wDayCareMon
@@ -45,7 +45,7 @@ LoadMonData_::
 
 .copyMonData
 	ld de, wLoadedMon
-	ld bc, wPartyMon2 - wPartyMon1
+	ld bc, PARTYMON_STRUCT_LENGTH
 	jp CopyData
 
 ; get species of mon e in list [wMonDataLocation] for LoadMonData
@@ -64,5 +64,5 @@ GetMonSpecies:
 	ld d, 0
 	add hl, de
 	ld a, [hl]
-	ld [wcf91], a
+	ld [wCurPartySpecies], a
 	ret

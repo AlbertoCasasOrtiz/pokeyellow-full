@@ -1,182 +1,163 @@
 SurfingPikachuOAMData:
-	dbw $00, .Frame0
-	dbw $00, .Frame1
-	dbw $36, .Frame2
-	dbw $03, .Frame3
-	dbw $39, .Frame4
-	dbw $06, .Frame5
-	dbw $3c, .Frame6
-	dbw $09, .Frame7
-	dbw $60, .Frame8
-	dbw $0c, .Frame9
-	dbw $63, .Frame10
-	dbw $30, .Frame11
-	dbw $66, .Frame12
-	dbw $33, .Frame13
-	dbw $69, .Frame14
-	dbw $6c, .Frame15
-	dbw $9c, .Frame16
-	dbw $a0, .Frame17
-	dbw $a3, .Frame18
-	dbw $a7, .Frame19
-	dbw $a8, .Frame20
-	dbw $98, .Frame21
-	dbw $e0, .Frame22
-	dbw $e6, .Frame23
-	dbw $ca, .Frame24
-	dbw $a7, .Frame25
-	dbw $00, .Frame26
-	dbw $00, .Frame27
-	dbw $00, .Frame28
-	dbw $00, .Frame29
-	dbw $00, .Frame30
-	dbw $00, .Frame31
-	dbw $80, .Frame32
-	dbw $84, .Frame33
-	dbw $88, .Frame34
-	dbw $8c, .Frame35
+; entries correspond to SURFPIKA_OAMSET_* constants (see constants/sprite_anim_constants.asm)
+	table_width 3
+	dbw $00, .OAMData_1x1            ; SURFPIKA_OAMSET_00
+	dbw $00, .OAMData_SurfingPikachu ; SURFPIKA_OAMSET_SURFING_ANGLE_1_1
+	dbw $36, .OAMData_SurfingPikachu ; SURFPIKA_OAMSET_SURFING_ANGLE_1_2
+	dbw $03, .OAMData_SurfingPikachu ; SURFPIKA_OAMSET_SURFING_ANGLE_2_1
+	dbw $39, .OAMData_SurfingPikachu ; SURFPIKA_OAMSET_SURFING_ANGLE_2_2
+	dbw $06, .OAMData_SurfingPikachu ; SURFPIKA_OAMSET_SURFING_ANGLE_3_1
+	dbw $3c, .OAMData_SurfingPikachu ; SURFPIKA_OAMSET_SURFING_ANGLE_3_2
+	dbw $09, .OAMData_SurfingPikachu ; SURFPIKA_OAMSET_SURFING_ANGLE_4_1
+	dbw $60, .OAMData_SurfingPikachu ; SURFPIKA_OAMSET_SURFING_ANGLE_4_2
+	dbw $0c, .OAMData_SurfingPikachu ; SURFPIKA_OAMSET_SURFING_ANGLE_5_1
+	dbw $63, .OAMData_SurfingPikachu ; SURFPIKA_OAMSET_SURFING_ANGLE_5_2
+	dbw $30, .OAMData_SurfingPikachu ; SURFPIKA_OAMSET_SURFING_ANGLE_6_1
+	dbw $66, .OAMData_SurfingPikachu ; SURFPIKA_OAMSET_SURFING_ANGLE_6_2
+	dbw $33, .OAMData_SurfingPikachu ; SURFPIKA_OAMSET_SURFING_ANGLE_7_1
+	dbw $69, .OAMData_SurfingPikachu ; SURFPIKA_OAMSET_SURFING_ANGLE_7_2
+	dbw $6c, .OAMData_SurfingPikachu ; SURFPIKA_OAMSET_SURFING_FRONT_UNUSED
+	dbw $9c, .OAMData_SurfingPikachu ; SURFPIKA_OAMSET_SURFING_BACK_UNUSED
+	dbw $a0, .OAMData_SurfingPikachu ; SURFPIKA_OAMSET_SMALL_SPLASH_1
+	dbw $a3, .OAMData_SurfingPikachu ; SURFPIKA_OAMSET_SMALL_SPLASH_2
+	dbw $a7, .OAMData_SmallSplash    ; SURFPIKA_OAMSET_BIG_SPLASH_1
+	dbw $a8, .OAMData_LargeSplash    ; SURFPIKA_OAMSET_BIG_SPLASH_2
+	dbw $98, .OAMData_EmptySurfboard ; SURFPIKA_OAMSET_BIG_SPLASH_3
+	dbw $e0, .OAMData_AnnouncedText  ; SURFPIKA_OAMSET_START_TEXT
+	dbw $e6, .OAMData_AnnouncedText  ; SURFPIKA_OAMSET_GOAL_TEXT
+	dbw $ca, .OAMData_AnnouncedText  ; SURFPIKA_OAMSET_OH_NO_TEXT
+	dbw $a7, .OAMData_WaterSpray     ; SURFPIKA_OAMSET_WATER_SPRAY
+	dbw $00, .OAMData_Plus50Pts      ; SURFPIKA_OAMSET_PLUS_50_POINTS
+	dbw $00, .OAMData_Plus150Pts     ; SURFPIKA_OAMSET_PLUS_150_POINTS
+	dbw $00, .OAMData_Plus350Pts     ; SURFPIKA_OAMSET_PLUS_350_POINTS
+	dbw $00, .OAMData_Plus750Pts     ; SURFPIKA_OAMSET_PLUS_750_POINTS
+	dbw $00, .OAMData_Plus180Pts     ; SURFPIKA_OAMSET_PLUS_180_POINTS
+	dbw $00, .OAMData_Plus500Pts     ; SURFPIKA_OAMSET_PLUS_500_POINTS
+	dbw $80, .OAMData_IntroPikachu   ; SURFPIKA_OAMSET_INTRO_PIKACHU_1
+	dbw $84, .OAMData_IntroPikachu   ; SURFPIKA_OAMSET_INTRO_PIKACHU_2
+	dbw $88, .OAMData_IntroPikachu   ; SURFPIKA_OAMSET_INTRO_PIKACHU_3
+	dbw $8c, .OAMData_IntroPikachu   ; SURFPIKA_OAMSET_INTRO_PIKACHU_4
+	assert_table_length NUM_SURFPIKA_OAMSETS
 
-.Frame0:
+.OAMData_1x1:
 	db 1
-	db $fc, $fc, $00, $00
+	db  -4,  -4, $00, 0
 
-.Frame1:
-.Frame2:
-.Frame3:
-.Frame4:
-.Frame5:
-.Frame6:
-.Frame7:
-.Frame8:
-.Frame9:
-.Frame10:
-.Frame11:
-.Frame12:
-.Frame13:
-.Frame14:
-.Frame15:
-.Frame16:
-.Frame17:
-.Frame18:
+.OAMData_SurfingPikachu:
 	db 9
-	db $f4, $f4, $00, $00
-	db $f4, $fc, $01, $00
-	db $f4, $04, $02, $00
-	db $fc, $f4, $10, $00
-	db $fc, $fc, $11, $00
-	db $fc, $04, $12, $00
-	db $04, $f4, $20, $00
-	db $04, $fc, $21, $00
-	db $04, $04, $22, $00
+	db -12, -12, $00, 0
+	db -12,  -4, $01, 0
+	db -12,   4, $02, 0
+	db  -4, -12, $10, 0
+	db  -4,  -4, $11, 0
+	db  -4,   4, $12, 0
+	db   4, -12, $20, 0
+	db   4,  -4, $21, 0
+	db   4,   4, $22, 0
 
-.Frame22:
-.Frame23:
-.Frame24:
+.OAMData_AnnouncedText:
 	db 12
-	db $f8, $e8, $00, $00
-	db $f8, $f0, $01, $00
-	db $f8, $f8, $02, $00
-	db $f8, $00, $03, $00
-	db $f8, $08, $04, $00
-	db $f8, $10, $05, $00
-	db $00, $e8, $10, $00
-	db $00, $f0, $11, $00
-	db $00, $f8, $12, $00
-	db $00, $00, $13, $00
-	db $00, $08, $14, $00
-	db $00, $10, $15, $00
+	db  -8, -24, $00, 0
+	db  -8, -16, $01, 0
+	db  -8,  -8, $02, 0
+	db  -8,   0, $03, 0
+	db  -8,   8, $04, 0
+	db  -8,  16, $05, 0
+	db   0, -24, $10, 0
+	db   0, -16, $11, 0
+	db   0,  -8, $12, 0
+	db   0,   0, $13, 0
+	db   0,   8, $14, 0
+	db   0,  16, $15, 0
 
-.Frame25:
+.OAMData_WaterSpray:
 	db 3
-	db $fc, $0b, $00, $10
-	db $04, $03, $0f, $10
-	db $04, $0b, $10, $10
+	db  -4,  11, $00, OAM_PAL1
+	db   4,   3, $0f, OAM_PAL1
+	db   4,  11, $10, OAM_PAL1
 
-.Frame19:
+.OAMData_SmallSplash:
 	db 6
-	db $fc, $f0, $00, $30
-	db $fc, $08, $00, $10
-	db $04, $f0, $10, $30
-	db $04, $f8, $0f, $30
-	db $04, $00, $0f, $10
-	db $04, $08, $10, $10
+	db  -4, -16, $00, OAM_PAL1 | OAM_XFLIP
+	db  -4,   8, $00, OAM_PAL1
+	db   4, -16, $10, OAM_PAL1 | OAM_XFLIP
+	db   4,  -8, $0f, OAM_PAL1 | OAM_XFLIP
+	db   4,   0, $0f, OAM_PAL1
+	db   4,   8, $10, OAM_PAL1
 
-.Frame20:
+.OAMData_LargeSplash:
 	db 12
-	db $f4, $f0, $00, $10
-	db $f4, $f8, $01, $10
-	db $f4, $00, $01, $30
-	db $f4, $08, $00, $30
-	db $fc, $f0, $10, $10
-	db $fc, $f8, $11, $10
-	db $fc, $00, $11, $30
-	db $fc, $08, $10, $30
-	db $04, $f0, $20, $10
-	db $04, $f8, $21, $10
-	db $04, $00, $21, $30
-	db $04, $08, $20, $30
+	db -12, -16, $00, OAM_PAL1
+	db -12,  -8, $01, OAM_PAL1
+	db -12,   0, $01, OAM_PAL1 | OAM_XFLIP
+	db -12,   8, $00, OAM_PAL1 | OAM_XFLIP
+	db  -4, -16, $10, OAM_PAL1
+	db  -4,  -8, $11, OAM_PAL1
+	db  -4,   0, $11, OAM_PAL1 | OAM_XFLIP
+	db  -4,   8, $10, OAM_PAL1 | OAM_XFLIP
+	db   4, -16, $20, OAM_PAL1
+	db   4,  -8, $21, OAM_PAL1
+	db   4,   0, $21, OAM_PAL1 | OAM_XFLIP
+	db   4,   8, $20, OAM_PAL1 | OAM_XFLIP
 
-.Frame21:
+.OAMData_EmptySurfboard:
 	db 3
-	db $04, $f4, $00, $00
-	db $04, $fc, $01, $00
-	db $04, $04, $02, $00
+	db   4, -12, $00, 0
+	db   4,  -4, $01, 0
+	db   4,   4, $02, 0
 
-.Frame26:
+.OAMData_Plus50Pts:
 	db 3
-	db $fc, $f4, $bf, $00
-	db $fc, $fc, $d5, $00
-	db $fc, $04, $d0, $00
+	db  -4, -12, $bf, 0
+	db  -4,  -4, $d5, 0
+	db  -4,   4, $d0, 0
 
-.Frame27:
+.OAMData_Plus150Pts:
 	db 4
-	db $fc, $f0, $bf, $00
-	db $fc, $f8, $d1, $00
-	db $fc, $00, $d5, $00
-	db $fc, $08, $d0, $00
+	db  -4, -16, $bf, 0
+	db  -4,  -8, $d1, 0
+	db  -4,   0, $d5, 0
+	db  -4,   8, $d0, 0
 
-.Frame28:
+.OAMData_Plus350Pts:
 	db 4
-	db $fc, $f0, $bf, $00
-	db $fc, $f8, $d3, $00
-	db $fc, $00, $d5, $00
-	db $fc, $08, $d0, $00
+	db  -4, -16, $bf, 0
+	db  -4,  -8, $d3, 0
+	db  -4,   0, $d5, 0
+	db  -4,   8, $d0, 0
 
-.Frame29:
+.OAMData_Plus750Pts:
 	db 4
-	db $fc, $f0, $bf, $00
-	db $fc, $f8, $d7, $00
-	db $fc, $00, $d5, $00
-	db $fc, $08, $d0, $00
+	db  -4, -16, $bf, 0
+	db  -4,  -8, $d7, 0
+	db  -4,   0, $d5, 0
+	db  -4,   8, $d0, 0
 
-.Frame30:
+.OAMData_Plus180Pts:
 	db 4
-	db $fc, $f0, $bf, $00
-	db $fc, $f8, $d1, $00
-	db $fc, $00, $d8, $00
-	db $fc, $08, $d0, $00
+	db  -4, -16, $bf, 0
+	db  -4,  -8, $d1, 0
+	db  -4,   0, $d8, 0
+	db  -4,   8, $d0, 0
 
-.Frame31:
+.OAMData_Plus500Pts:
 	db 4
-	db $fc, $f0, $bf, $00
-	db $fc, $f8, $d5, $00
-	db $fc, $00, $d0, $00
-	db $fc, $08, $d0, $00
+	db  -4, -16, $bf, 0
+	db  -4,  -8, $d5, 0
+	db  -4,   0, $d0, 0
+	db  -4,   8, $d0, 0
 
-.Frame32:
-.Frame33:
-.Frame34:
-.Frame35:
+.OAMData_IntroPikachu:
 	db 12
-	db $f4, $f0, $03, $20
-	db $f4, $f8, $02, $20
-	db $f4, $00, $01, $20
-	db $f4, $08, $00, $20
-	db $fc, $f0, $13, $20
-	db $fc, $f8, $12, $20
-	db $fc, $00, $11, $20
-	db $fc, $08, $10, $20
-	db $04, $f0, $23, $20
-	db $04, $f8, $22, $20
-	db $04, $00, $21, $20
-	db $04, $08, $20, $20
+	db -12, -16, $03, OAM_XFLIP
+	db -12,  -8, $02, OAM_XFLIP
+	db -12,   0, $01, OAM_XFLIP
+	db -12,   8, $00, OAM_XFLIP
+	db  -4, -16, $13, OAM_XFLIP
+	db  -4,  -8, $12, OAM_XFLIP
+	db  -4,   0, $11, OAM_XFLIP
+	db  -4,   8, $10, OAM_XFLIP
+	db   4, -16, $23, OAM_XFLIP
+	db   4,  -8, $22, OAM_XFLIP
+	db   4,   0, $21, OAM_XFLIP
+	db   4,   8, $20, OAM_XFLIP

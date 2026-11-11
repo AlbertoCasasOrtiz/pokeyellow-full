@@ -5,16 +5,15 @@ EnterMapAnim::
 	call Delay3
 	push hl
 	call GBFadeInFromWhite
-	ld hl, wFlags_D733
-	bit 7, [hl] ; used fly out of battle?
-	res 7, [hl]
+	ld hl, wStatusFlags7
+	bit BIT_USED_FLY, [hl]
+	res BIT_USED_FLY, [hl]
 	jr nz, .flyAnimation
 	ld a, SFX_TELEPORT_ENTER_1
 	call PlaySound
-	ld hl, wd732
-	bit 4, [hl] ; used dungeon warp?
+	ld hl, wStatusFlags6
+	bit BIT_DUNGEON_WARP, [hl]
 	pop hl
-	;res 4, [hl]
 	jr nz, .dungeonWarpAnimation
 	call PlayerSpinWhileMovingDown
 	ld a, SFX_TELEPORT_ENTER_2
@@ -34,18 +33,18 @@ EnterMapAnim::
 	ld [hl], $ff ; wPlayerSpinInPlaceAnimSoundID
 	ld hl, wFacingDirectionList
 	call PlayerSpinInPlace
-	ld a, $1
+	ld a, PIKACHU_SPAWN_RIGHT
 	ld [wPikachuSpawnState], a
 .restoreDefaultMusic
 	call PlayDefaultMusic
 .done
-	call Func_151d
+	call DisableHidePikachuWhileLeavingMap
 	jp RestoreFacingDirectionAndYScreenPos
 .dungeonWarpAnimation
 	ld c, 50
 	call DelayFrames
 	call PlayerSpinWhileMovingDown
-	ld a, $0
+	ld a, PIKACHU_SPAWN_DEFAULT
 	ld [wPikachuSpawnState], a
 	jr .done
 .flyAnimation
@@ -62,7 +61,7 @@ EnterMapAnim::
 	ld de, FlyAnimationEnterScreenCoords
 	call DoFlyAnimation
 	call LoadPlayerSpriteGraphics
-	ld a, $1
+	ld a, PIKACHU_SPAWN_RIGHT
 	ld [wPikachuSpawnState], a
 	jr .restoreDefaultMusic
 
@@ -93,9 +92,8 @@ PlayerSpinWhileMovingDown:
 	ld [hl], a ; wPlayerSpinWhileMovingUpOrDownAnimFrameDelay
 	jp PlayerSpinWhileMovingUpOrDown
 
-
 _LeaveMapAnim::
-	call Func_1510
+	call EnableHidePikachuWhileLeavingMap
 	call InitFacingDirectionList
 	call IsPlayerStandingOnWarpPadOrHole
 	ld a, b
@@ -127,8 +125,8 @@ _LeaveMapAnim::
 .playerNotStandingOnWarpPadOrHole
 	ld a, $4
 	call StopMusic
-	ld a, [wd732]
-	bit 6, a ; is the last used pokemon center the destination?
+	ld a, [wStatusFlags6]
+	bit BIT_ESCAPE_WARP, a
 	jr z, .flyAnimation
 ; if going to the last used pokemon center
 	ld hl, wPlayerSpinInPlaceAnimFrameDelay
@@ -210,19 +208,19 @@ LeaveMapThroughHoleAnim:
 	ld a, $ff
 	ld [wUpdateSpritesEnabled], a ; disable UpdateSprites
 	; shift upper half of player's sprite down 8 pixels and hide lower half
-	ld a, [wOAMBuffer + 0 * 4 + 2]
-	ld [wOAMBuffer + 2 * 4 + 2], a
-	ld a, [wOAMBuffer + 1 * 4 + 2]
-	ld [wOAMBuffer + 3 * 4 + 2], a
-	ld a, $a0
-	ld [wOAMBuffer + 0 * 4], a
-	ld [wOAMBuffer + 1 * 4], a
+	ld a, [wShadowOAMSprite00TileID]
+	ld [wShadowOAMSprite02TileID], a
+	ld a, [wShadowOAMSprite01TileID]
+	ld [wShadowOAMSprite03TileID], a
+	ld a, SCREEN_HEIGHT_PX + OAM_Y_OFS
+	ld [wShadowOAMSprite00YCoord], a
+	ld [wShadowOAMSprite01YCoord], a
 	ld c, 2
 	call DelayFrames
 	; hide upper half of player's sprite
-	ld a, $a0
-	ld [wOAMBuffer + 2 * 4], a
-	ld [wOAMBuffer + 3 * 4], a
+	ld a, SCREEN_HEIGHT_PX + OAM_Y_OFS
+	ld [wShadowOAMSprite02YCoord], a
+	ld [wShadowOAMSprite03YCoord], a
 	call GBFadeOutToWhite
 	ld a, $1
 	ld [wUpdateSpritesEnabled], a ; enable UpdateSprites
@@ -271,7 +269,7 @@ InitFacingDirectionList:
 	ld [wSavedPlayerScreenY], a
 	ld hl, PlayerSpinningFacingOrder
 	ld de, wFacingDirectionList
-	ld bc, 4
+	ld bc, OBJ_SIZE
 	call CopyData
 	ld a, [wSpritePlayerStateData1ImageIndex] ; (image index is locked to standing images)
 	ld hl, wFacingDirectionList
@@ -295,7 +293,7 @@ SpinPlayerSprite:
 	push hl
 	ld hl, wFacingDirectionList
 	ld de, wFacingDirectionList - 1
-	ld bc, 4
+	ld bc, OBJ_SIZE
 	call CopyData
 	ld a, [wFacingDirectionList - 1]
 	ld [wFacingDirectionList + 3], a
@@ -385,8 +383,8 @@ INCLUDE "data/tilesets/warp_pad_hole_tile_ids.asm"
 FishingAnim:
 	ld c, 10
 	call DelayFrames
-	ld hl, wd736
-	set 6, [hl] ; reserve the last 4 OAM entries
+	ld hl, wMovementFlags
+	set BIT_LEDGE_OR_FISHING, [hl]
 	ld hl, vNPCSprites
 	ld de, RedSprite
 	ld b, BANK(RedSprite)
@@ -400,8 +398,8 @@ FishingAnim:
 	ld b, $0
 	ld hl, FishingRodOAM
 	add hl, bc
-	ld de, wOAMBuffer + $9c
-	ld bc, $4
+	ld de, wShadowOAMSprite39
+	ld bc, OBJ_SIZE
 	call CopyData
 	ld c, 100
 	call DelayFrames
@@ -420,7 +418,7 @@ FishingAnim:
 .loop
 	ld hl, wSpritePlayerStateData1YPixels
 	call .ShakePlayerSprite
-	ld hl, wOAMBuffer + $9c
+	ld hl, wShadowOAMSprite39
 	call .ShakePlayerSprite
 	call Delay3
 	dec b
@@ -431,8 +429,8 @@ FishingAnim:
 	ld a, [wSpritePlayerStateData1ImageIndex] ; (image index is locked to standing images)
 	cp SPRITE_FACING_UP
 	jr nz, .skipHidingFishingRod
-	ld a, $a0
-	ld [wOAMBuffer + $9c], a
+	ld a, SCREEN_HEIGHT_PX + OAM_Y_OFS
+	ld [wShadowOAMSprite39YCoord], a
 
 .skipHidingFishingRod
 	ld hl, wEmotionBubbleSpriteIndex
@@ -446,15 +444,15 @@ FishingAnim:
 	cp SPRITE_FACING_UP
 	jr nz, .skipUnhidingFishingRod
 	ld a, $44
-	ld [wOAMBuffer + $9c], a
+	ld [wShadowOAMSprite39YCoord], a
 
 .skipUnhidingFishingRod
 	ld hl, ItsABiteText
 
 .done
 	call PrintText
-	ld hl, wd736
-	res 6, [hl] ; unreserve the last 4 OAM entries
+	ld hl, wMovementFlags
+	res BIT_LEDGE_OR_FISHING, [hl]
 	call LoadFontTilePatterns
 	ret
 
@@ -481,7 +479,7 @@ FishingRodOAM:
 	dbsprite  9, 11,  4,  3, $fd, 0         ; down
 	dbsprite  9,  8,  4,  4, $fd, 0         ; up
 	dbsprite  8, 10,  0,  0, $fe, 0         ; left
-	dbsprite 11, 10,  0,  0, $fe, OAM_HFLIP ; right
+	dbsprite 11, 10,  0,  0, $fe, OAM_XFLIP ; right
 
 MACRO fishing_gfx
 	dw \1
@@ -520,10 +518,10 @@ _HandleMidJump::
 	ldh [hJoyPressed], a
 	ldh [hJoyReleased], a
 	ld [wPlayerJumpingYScreenCoordsIndex], a
-	ld hl, wd736
-	res 6, [hl] ; not jumping down a ledge any more
-	ld hl, wd730
-	res 7, [hl] ; not simulating joypad states any more
+	ld hl, wMovementFlags
+	res BIT_LEDGE_OR_FISHING, [hl]
+	ld hl, wStatusFlags5
+	res BIT_SCRIPTED_MOVEMENT_STATE, [hl]
 	xor a
 	ld [wJoyIgnore], a
 	ret

@@ -24,17 +24,17 @@ LoadBGMapAttributes::
 	ld de, $10
 	add hl, de
 	ld a, h
-	ldh [rHDMA1], a
+	ldh [rVDMA_SRC_HIGH], a
 	ld a, l
-	ldh [rHDMA2], a
+	ldh [rVDMA_SRC_LOW], a
 	ld de, vBGMap0
 	ld a, d
-	ldh [rHDMA3], a
+	ldh [rVDMA_DEST_HIGH], a
 	ld a, e
-	ldh [rHDMA4], a
+	ldh [rVDMA_DEST_LOW], a
 
 	ldh a, [rLCDC]
-	and rLCDC_ENABLE_MASK ; is LCD off?
+	and LCDC_ON ; is LCD off?
 	jr z, .lcdOff ; if off, transfer immediately
 ; wait for VBlank if LCD is on
 .waitForVBlankLoop1
@@ -47,8 +47,8 @@ LoadBGMapAttributes::
 	jr nz, .waitForAccessibleVRAMLoop1 ; loop until we're in a safe period to transfer to VRAM
 .lcdOff
 	ld a, c ; number of BG attributes to transfer, plus 1 times 16
-	ldh [rHDMA5], a ; initiate transfer
-	call Func_3082 ; update audio so it doesn't "lag"
+	ldh [rVDMA_LEN], a ; initiate transfer
+	call UpdateAudioDuringLoadBGMapAttributes ; update audio so it doesn't "lag"
 	pop hl
 	ld a, [hli]
 	ld c, a     ; number of BG attributes to transfer, plus 1 times 16
@@ -58,17 +58,17 @@ LoadBGMapAttributes::
 	ld d, a    ; offset of the attributes
 	add hl, de ; hl = new pointer
 	ld a, h
-	ldh [rHDMA1], a
+	ldh [rVDMA_SRC_HIGH], a
 	ld a, l
-	ldh [rHDMA2], a
+	ldh [rVDMA_SRC_LOW], a
 	ld de, vBGMap1 ; copy to vBGMap1
 	ld a, d
-	ldh [rHDMA3], a
+	ldh [rVDMA_DEST_HIGH], a
 	ld a, e
-	ldh [rHDMA4], a
+	ldh [rVDMA_DEST_LOW], a
 ; LCD check again
 	ldh a, [rLCDC]
-	and rLCDC_ENABLE_MASK ; is LCD off?
+	and LCDC_ON ; is LCD off?
 	jr z, .lcdOff2 ; if off, transfer immediately
 ; wait for VBlank if LCD is on
 .waitForVBlankLoop2
@@ -81,7 +81,7 @@ LoadBGMapAttributes::
 	jr nz, .waitForAccessibleVRAMLoop2 ; loop until we're in a safe period to transfer to VRAM
 .lcdOff2
 	ld a, c
-	ldh [rHDMA5], a
+	ldh [rVDMA_LEN], a
 	pop af
 	dec a
 	dec a
@@ -94,9 +94,9 @@ LoadBGMapAttributes::
 	dec a
 	call z, HandlePartyHPBarAttributes
 .done
-	call Func_3082
+	call UpdateAudioDuringLoadBGMapAttributes
 	ldh a, [rIF]
-	res VBLANK, a
+	res B_IF_VBLANK, a
 	ldh [rIF], a
 	xor a
 	ldh [rVBK], a
@@ -104,8 +104,8 @@ LoadBGMapAttributes::
 	ret
 
 BGMapAttributesPointers:
-	dw BGMapAttributes_Unknown1
-	dw BGMapAttributes_Unknown2
+	dw BGMapAttributes_PikachusBeachTitle
+	dw BGMapAttributes_PikachusPortrait
 	dw BGMapAttributes_GameFreakIntro
 	dw BGMapAttributes_TrainerCard
 	dw BGMapAttributes_PartyMenu
@@ -116,7 +116,7 @@ BGMapAttributesPointers:
 	dw BGMapAttributes_StatusScreen
 	dw BGMapAttributes_Battle
 	dw BGMapAttributes_WholeScreen
-	dw BGMapAttributes_Unknown13
+	dw BGMapAttributes_ShakeEnemyHUD
 
 HandleBadgeFaceAttributes:
 ; zero out the attributes if the player doesn't have the respective badge

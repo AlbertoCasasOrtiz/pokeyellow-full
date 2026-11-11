@@ -1,16 +1,21 @@
-SetDefaultNamesBeforeTitlescreen::
-	ld hl, NintenText
+PrepareTitleScreen::
+	; These debug names are already copied later in PrepareOakSpeech.
+	; Removing the unused copies below has no apparent impact.
+	; CopyDebugName can also be safely deleted afterwards.
+	ld hl, DebugNewGamePlayerName
 	ld de, wPlayerName
-	call CopyFixedLengthText
-	ld hl, SonyText
+	call CopyDebugName
+	ld hl, DebugNewGameRivalName
 	ld de, wRivalName
-	call CopyFixedLengthText
+	call CopyDebugName
 	xor a
 	ldh [hWY], a
 	ld [wLetterPrintingDelayFlags], a
-	ld hl, wd732
+	ld hl, wStatusFlags6
 	ld [hli], a
+	ASSERT wStatusFlags6 + 1 == wStatusFlags7
 	ld [hli], a
+	ASSERT wStatusFlags7 + 1 == wElite4Flags
 	ld [hl], a
 	ld a, BANK(Music_TitleScreen)
 	ld [wAudioROMBank], a
@@ -30,7 +35,6 @@ DisplayTitleScreen:
 	call ClearScreen
 	call DisableLCD
 	call LoadFontTilePatterns
-; todo: fix hl pointers
 	ld hl, NintendoCopyrightLogoGraphics
 	ld de, vTitleLogo tile $60
 	ld bc, 5 tiles
@@ -41,15 +45,15 @@ DisplayTitleScreen:
 	ld bc, 1 tiles
 	ld a, BANK(NineTile)
 	call FarCopyData
-	ld hl, GamefreakLogoGraphics
+	ld hl, GameFreakLogoGraphics
 	ld de, vTitleLogo tile $65
 	ld bc, 9 tiles
-	ld a, BANK(GamefreakLogoGraphics)
+	ld a, BANK(GameFreakLogoGraphics)
 	call FarCopyData
 	callfar LoadYellowTitleScreenGFX
 	ld hl, vBGMap0
 	ld bc, (vBGMap1 tile $40) - vBGMap0
-	ld a, " "
+	ld a, ' '
 	call FillMemory
 	callfar TitleScreen_PlacePokemonLogo
 	call FillSpriteBuffer0WithAA
@@ -71,7 +75,7 @@ DisplayTitleScreen:
 	call GBPalNormal
 	ld a, %11100000
 	ldh [rOBP0], a
-	call UpdateGBCPal_OBP0
+	call UpdateCGBPal_OBP0
 
 ; make pokemon logo bounce up and down
 	ld bc, hSCY ; background scroll Y
@@ -135,12 +139,11 @@ DisplayTitleScreen:
 	ld a, SFX_INTRO_WHOOSH
 	call PlaySound
 
-; scroll game version in from the right
 	callfar TitleScreen_PlacePikaSpeechBubble
 	ld a, SCREEN_HEIGHT_PX
 	ldh [hWY], a
 	call Delay3
-	ld e, 0
+	ldpikacry e, PikachuCry1
 	call TitleScreen_PlayPikachuPCM
 	call WaitForSoundToFinish
 	call StopAllMusic
@@ -149,32 +152,32 @@ DisplayTitleScreen:
 	call PlaySound
 .loop
 	xor a
-	ld [wUnusedCC5B], a
+	ld [wUnusedFlag], a
 	ld [wTitleScreenScene], a
-	ld [wTitleScreenScene + 1], a
-	ld [wTitleScreenScene + 2], a
-	ld [wTitleScreenScene + 3], a
-	ld a, $f
-	ld [wTitleScreenScene + 4], a
+	ld [wTitleScreenTimer], a
+	ld [wTitleScreenResetCounter], a
+	ld [wTitleScreenResetCounter + 1], a
+	ldpikacry a, PikachuCry16
+	ld [wTitleScreenPikachuCry], a
 .titleScreenLoop
 	call IncrementResetCounter
 	jp c, .doTitlescreenReset
 	call DelayFrame
 	call JoypadLowSensitivity
 	ldh a, [hJoyHeld]
-	cp D_UP | SELECT | B_BUTTON
+	cp PAD_UP | PAD_SELECT | PAD_B
 	jr z, .go_to_main_menu
 IF DEF(_DEBUG)
-	and A_BUTTON | SELECT | START
+	and PAD_A | PAD_SELECT | PAD_START
 ELSE
-	and A_BUTTON | START
+	and PAD_A | PAD_START
 ENDC
 	jr nz, .go_to_main_menu
 	call DoTitleScreenFunction
 	jr .titleScreenLoop
 
 .go_to_main_menu
-	ld e, $a
+	ldpikacry e, PikachuCry11
 	call TitleScreen_PlayPikachuPCM
 	call GBPalWhiteOutWithDelay3
 	call ClearSprites
@@ -191,12 +194,12 @@ ENDC
 	call LoadGBPal
 	ldh a, [hJoyHeld]
 	ld b, a
-	and D_UP | SELECT | B_BUTTON
-	cp D_UP | SELECT | B_BUTTON
+	and PAD_UP | PAD_SELECT | PAD_B
+	cp PAD_UP | PAD_SELECT | PAD_B
 	jp z, .doClearSaveDialogue
 IF DEF(_DEBUG)
 	ld a, b
-	bit BIT_SELECT, a
+	bit B_PAD_SELECT, a
 	jp z, MainMenu
 	callfar DebugMenu
 	jp hl
@@ -204,25 +207,23 @@ ELSE
 	jp MainMenu
 ENDC
 
-.asm_42f0
-; unreferenced
+.printerDebug ; unreferenced
 	callfar PrinterDebug
 	jp .loop
 
-.asm_42fb
-; unreferenced
-	ld a, [wTitleScreenScene + 4]
+.incrementPikachuCry ; unreferenced
+	ld a, [wTitleScreenPikachuCry]
 	inc a
-	cp $2a
-	jr c, .asm_4305
-	ld a, $f
-.asm_4305
-	ld [wTitleScreenScene + 4], a
+	cp NUM_PIKA_CRIES
+	jr c, .validPikachuCry
+	ldpikacry a, PikachuCry16
+.validPikachuCry
+	ld [wTitleScreenPikachuCry], a
 	ld e, a
 	callfar PlayPikachuSoundClip
 	xor a
-	ld [wTitleScreenScene + 2], a
-	ld [wTitleScreenScene + 3], a
+	ld [wTitleScreenResetCounter], a
+	ld [wTitleScreenResetCounter + 1], a
 	jp .titleScreenLoop
 
 .doTitlescreenReset
@@ -237,7 +238,6 @@ ENDC
 .doClearSaveDialogue
 	farjp DoClearSaveDialogue
 
-
 TitleScreenCopyTileMapToVRAM:
 	ldh [hAutoBGTransferDest + 1], a
 	jp Delay3
@@ -251,15 +251,15 @@ LoadCopyrightAndTextBoxTiles:
 LoadCopyrightTiles:
 	ld de, NintendoCopyrightLogoGraphics
 	ld hl, vChars2 tile $60
-	lb bc, BANK(NintendoCopyrightLogoGraphics), (TextBoxGraphics + $10 - NintendoCopyrightLogoGraphics) / $10 ; bug: overflows into text box graphics and copies the "A" tile
+	lb bc, BANK(NintendoCopyrightLogoGraphics), (TextBoxGraphics + $10 - NintendoCopyrightLogoGraphics) / TILE_SIZE ; bug: overflows into text box graphics and copies the "A" tile
 	call CopyVideoData
 	hlcoord 2, 7
 	ld de, CopyrightTextString
 	jp PlaceString
 
 CopyrightTextString:
-	db   $60,$61,$62,$63,$61,$62,$7c,$7f,$65,$66,$67,$68,$69,$6a			 ; ©1995-1999  Nintendo
-	next $60,$61,$62,$63,$61,$62,$7c,$7f,$6b,$6c,$6d,$6e,$6f,$70,$71,$72	 ; ©1995-1999  Creatures inc.
+	db   $60,$61,$62,$63,$61,$62,$7c,$7f,$65,$66,$67,$68,$69,$6a             ; ©1995-1999  Nintendo
+	next $60,$61,$62,$63,$61,$62,$7c,$7f,$6b,$6c,$6d,$6e,$6f,$70,$71,$72     ; ©1995-1999  Creatures inc.
 	next $60,$61,$62,$63,$61,$62,$7c,$7f,$73,$74,$75,$76,$77,$78,$79,$7a,$7b ; ©1995-1999  GAME FREAK inc.
 	db   "@"
 
@@ -279,7 +279,6 @@ DoTitleScreenFunction:
 	ld h, [hl]
 	ld l, a
 	jp hl
-
 
 .Jumptable:
 	dw .Nop
@@ -312,7 +311,7 @@ DoTitleScreenFunction:
 .BlinkClosed:
 	ld e, 8
 .LoadBlinkFrame:
-	ld hl, wOAMBuffer + 2
+	ld hl, wShadowOAMSprite00TileID
 	ld c, 8
 .loop
 	ld a, [hl]
@@ -344,16 +343,18 @@ DoTitleScreenFunction:
 	ld [wTitleScreenScene], a
 	ret
 
-; copy text of fixed length NAME_LENGTH (like player name, rival name, mon names, ...)
-CopyFixedLengthText:
+CopyDebugName:
 	ld bc, NAME_LENGTH
 	jp CopyData
 
-NintenText: db "NINTEN@"
-SonyText:   db "SONY@"
+DebugNewGamePlayerName:
+	db "NINTEN@"
+
+DebugNewGameRivalName:
+	db "SONY@"
 
 IncrementResetCounter:
-	ld hl, wTitleScreenScene + 2
+	ld hl, wTitleScreenResetCounter
 	ld e, [hl]
 	inc hl
 	ld d, [hl]
@@ -373,10 +374,10 @@ IncrementResetCounter:
 
 FillSpriteBuffer0WithAA:
 	xor a
-	call SwitchSRAMBankAndLatchClockData
+	call OpenSRAM
 	ld hl, sSpriteBuffer0
 	ld bc, $20
 	ld a, $aa
 	call FillMemory
-	call PrepareRTCDataAndDisableSRAM
+	call CloseSRAM
 	ret

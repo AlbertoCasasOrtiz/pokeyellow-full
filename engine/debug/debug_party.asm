@@ -1,32 +1,31 @@
-; not IshiharaTeam
-SetDebugTeam:
-	ld de, DebugTeam
+SetDebugNewGameParty: ; unreferenced except in _DEBUG
+	ld de, DebugNewGameParty
 .loop
 	ld a, [de]
 	cp -1
 	ret z
-	ld [wcf91], a
+	ld [wCurPartySpecies], a
 	inc de
 	ld a, [de]
-	ld [wCurEnemyLVL], a
+	ld [wCurEnemyLevel], a
 	inc de
 	call AddPartyMon
 	jr .loop
 
-DebugTeam:
+DebugNewGameParty: ; unreferenced except in _DEBUG
 	db SNORLAX, 80
 	db PERSIAN, 80
 	db JIGGLYPUFF, 15
-	db STARTER_PIKACHU, 5
+	db STARTER, 5
 	db -1 ; end
 
-DebugStart:
+PrepareNewGameDebug: ; dummy except in _DEBUG
 IF DEF(_DEBUG)
 	xor a ; PLAYER_PARTY_DATA
 	ld [wMonDataLocation], a
 
 	; Fly anywhere.
-	dec a ; $ff
+	dec a ; $ff (all bits)
 	ld [wTownVisitedFlag], a
 	ld [wTownVisitedFlag + 1], a
 
@@ -34,7 +33,7 @@ IF DEF(_DEBUG)
 	ld a, ~(1 << BIT_EARTHBADGE)
 	ld [wObtainedBadges], a
 
-	call SetDebugTeam
+	call SetDebugNewGameParty
 
 	; Pikachu gets Surf.
 	ld a, SURF
@@ -54,12 +53,12 @@ IF DEF(_DEBUG)
 
 	; Get some debug items.
 	ld hl, wNumBagItems
-	ld de, DebugItemsList
+	ld de, DebugNewGameItemsList
 .items_loop
 	ld a, [de]
 	cp -1
 	jr z, .items_end
-	ld [wcf91], a
+	ld [wCurItem], a
 	inc de
 	ld a, [de]
 	inc de
@@ -77,12 +76,13 @@ IF DEF(_DEBUG)
 
 	; Rival chose Jolteon.
 	ld hl, wRivalStarter
+	ASSERT wRivalStarter + 2 == wPlayerStarter
 	ld a, RIVAL_STARTER_JOLTEON
 	ld [hli], a
 	ld a, NUM_POKEMON
 	ld [hli], a ; hl = wUnknownDebugByte
-	ld a, STARTER_PIKACHU
-	ld [hl], a ; hl = wPlayerStarter
+	ld a, STARTER
+	ld [hl], a
 
 	; Give max money.
 	ld hl, wPlayerMoney
@@ -94,16 +94,20 @@ IF DEF(_DEBUG)
 	ret
 
 DebugSetPokedexEntries:
-	ld b, wPokedexOwnedEnd - wPokedexOwned - 1
+IF NUM_POKEMON / 8 != 0
+	ld b, NUM_POKEMON / 8 ; 151 / 8 == 18
 	ld a, %11111111
 .loop
 	ld [hli], a
 	dec b
 	jr nz, .loop
-	ld [hl], %01111111
+ENDC
+IF NUM_POKEMON % 8 != 0
+	ld [hl], (1 << (NUM_POKEMON % 8)) - 1 ; (1 << 151 % 8)) - 1 == %01111111
+ENDC
 	ret
 
-DebugItemsList:
+DebugNewGameItemsList:
 	db MASTER_BALL, 99
 	db TOWN_MAP, 1
 	db BICYCLE, 1
@@ -120,7 +124,7 @@ DebugItemsList:
 	db PP_UP, 99
 	db -1 ; end
 
-DebugUnusedList:
+DebugUnusedList: ; unreferenced
 	db OLD_AMBER, 1
 	db DOME_FOSSIL, 1
 	db HELIX_FOSSIL, 1

@@ -5,12 +5,12 @@ AnimCut:
 	ld c, $8
 .cutTreeLoop
 	push bc
-	ld hl, wOAMBuffer + $91
+	ld hl, wShadowOAMSprite36XCoord
 	ld a, 1
 	ld [wCoordAdjustmentAmount], a
 	ld c, 2
 	call AdjustOAMBlockXPos2
-	ld hl, wOAMBuffer + $99
+	ld hl, wShadowOAMSprite38XCoord
 	ld a, -1
 	ld [wCoordAdjustmentAmount], a
 	ld c, 2
@@ -18,7 +18,7 @@ AnimCut:
 	ldh a, [rOBP1]
 	xor $64
 	ldh [rOBP1], a
-	call UpdateGBCPal_OBP1
+	call UpdateCGBPal_OBP1
 	call DelayFrame
 	pop bc
 	dec c
@@ -34,7 +34,7 @@ AnimCut:
 	ld c, $8
 	call AnimCutGrass_UpdateOAMEntries
 	call AnimCutGrass_SwapOAMEntries
-	ld hl, wOAMBuffer + $90
+	ld hl, wShadowOAMSprite36YCoord
 	ld a, 2
 	ld [wCoordAdjustmentAmount], a
 	ld c, 4
@@ -46,22 +46,22 @@ AnimCut:
 
 AnimCutGrass_UpdateOAMEntries:
 	push bc
-	ld hl, wOAMBuffer + $91
+	ld hl, wShadowOAMSprite36XCoord
 	ld a, 1
 	ld [wCoordAdjustmentAmount], a
 	ld c, 1
 	call AdjustOAMBlockXPos2
-	ld hl, wOAMBuffer + $95
+	ld hl, wShadowOAMSprite37XCoord
 	ld a, 2
 	ld [wCoordAdjustmentAmount], a
 	ld c, 1
 	call AdjustOAMBlockXPos2
-	ld hl, wOAMBuffer + $99
+	ld hl, wShadowOAMSprite38XCoord
 	ld a, -2
 	ld [wCoordAdjustmentAmount], a
 	ld c, 1
 	call AdjustOAMBlockXPos2
-	ld hl, wOAMBuffer + $9d
+	ld hl, wShadowOAMSprite39XCoord
 	ld a, -1
 	ld [wCoordAdjustmentAmount], a
 	ld c, 1
@@ -69,7 +69,7 @@ AnimCutGrass_UpdateOAMEntries:
 	ldh a, [rOBP1]
 	xor $64
 	ldh [rOBP1], a
-	call UpdateGBCPal_OBP1
+	call UpdateCGBPal_OBP1
 	call DelayFrame
 	pop bc
 	dec c
@@ -77,15 +77,15 @@ AnimCutGrass_UpdateOAMEntries:
 	ret
 
 AnimCutGrass_SwapOAMEntries:
-	ld hl, wOAMBuffer + $90
+	ld hl, wShadowOAMSprite36
 	ld de, wBuffer
-	ld bc, $8
+	ld bc, 2 * OBJ_SIZE
 	call CopyData
-	ld hl, wOAMBuffer + $98
-	ld de, wOAMBuffer + $90
-	ld bc, $8
+	ld hl, wShadowOAMSprite38
+	ld de, wShadowOAMSprite36
+	ld bc, 2 * OBJ_SIZE
 	call CopyData
 	ld hl, wBuffer
-	ld de, wOAMBuffer + $98
-	ld bc, $8
+	ld de, wShadowOAMSprite38
+	ld bc, 2 * OBJ_SIZE
 	jp CopyData

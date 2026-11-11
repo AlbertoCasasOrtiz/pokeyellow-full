@@ -31,16 +31,16 @@ ShakeElevator::
 	ld a, SFX_SAFARI_ZONE_PA
 	call PlayMusic
 .musicLoop
-	ld a, [wChannelSoundIDs + Ch5]
+	ld a, [wChannelSoundIDs + CHAN5]
 	cp SFX_SAFARI_ZONE_PA
 	jr z, .musicLoop
 	call UpdateSprites
 	jp PlayDefaultMusic
 
 ShakeElevatorRedrawRow:
-; This function is used to redraw certain portions of the screen, but it does
-; not appear to ever result in any visible effect, so this function seems to
-; be pointless.
+; Redraws slightly above the top and bottom edges of the screen in the bgmap
+; This prevents small white lines from showing during the shaking animation if the bgmap hasn't been loaded outside the boundaries of the screen yet
+; (For example, after loading a save in an elevator)
 	ld hl, wMapViewVRAMPointer + 1
 	ld a, [hld]
 	push af

@@ -1,7 +1,7 @@
 ClearSprites::
 	xor a
-	ld hl, wOAMBuffer
-	ld b, wOAMBufferEnd - wOAMBuffer
+	ld hl, wShadowOAM
+	ld b, wShadowOAMEnd - wShadowOAM
 .loop
 	ld [hli], a
 	dec b
@@ -9,10 +9,10 @@ ClearSprites::
 	ret
 
 HideSprites::
-	ld a, 160
-	ld hl, wOAMBuffer
-	ld de, 4
-	ld b, 40
+	ld a, SCREEN_HEIGHT_PX + OAM_Y_OFS
+	ld hl, wShadowOAMSprite00YCoord
+	ld de, OBJ_SIZE
+	ld b, OAM_COUNT
 .loop
 	ld [hl], a
 	add hl, de

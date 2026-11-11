@@ -25,37 +25,28 @@ DEF SLOTS_SOMEONESKEYS EQU $ff
 ; in game trades
 ; TradeMons indexes (see data/events/trades.asm)
 	const_def
-	const TRADE_FOR_TERRY
-	const TRADE_FOR_MARCEL
-	const TRADE_FOR_CHIKUCHIKU
-	const TRADE_FOR_SAILOR
-	const TRADE_FOR_DUX
-	const TRADE_FOR_MARC
-	const TRADE_FOR_LOLA
-	const TRADE_FOR_DORIS
-	const TRADE_FOR_CRINKLES
-	const TRADE_FOR_SPOT
+	const TRADE_FOR_GURIO
+	const TRADE_FOR_MILES
+	const TRADE_FOR_STINGER ; unused
+	const TRADE_FOR_STICKY
+	const TRADE_FOR_BART    ; unused
+	const TRADE_FOR_SPIKE
+	const TRADE_FOR_MARTY   ; unused
+	const TRADE_FOR_BUFFY
+	const TRADE_FOR_CEZANNE
+	const TRADE_FOR_RICKY
 DEF NUM_NPC_TRADES EQU const_value
+
+; TradeMons table width
+DEF TRADE_DATA_SIZE EQU 3 + NAME_LENGTH
 
 ; in game trade dialog sets
 ; InGameTradeTextPointers indexes (see engine/events/in_game_trades.asm)
 	const_def
 	const TRADE_DIALOGSET_CASUAL
-	const TRADE_DIALOGSET_POLITE
+	const TRADE_DIALOGSET_EVOLUTION
 	const TRADE_DIALOGSET_HAPPY
-
-; badges
-; wObtainedBadges and wBeatGymFlags bits
-	const_def
-	const BIT_BOULDERBADGE ; 0
-	const BIT_CASCADEBADGE ; 1
-	const BIT_THUNDERBADGE ; 2
-	const BIT_RAINBOWBADGE ; 3
-	const BIT_SOULBADGE    ; 4
-	const BIT_MARSHBADGE   ; 5
-	const BIT_VOLCANOBADGE ; 6
-	const BIT_EARTHBADGE   ; 7
-DEF NUM_BADGES EQU const_value
+DEF NUM_TRADE_DIALOGSETS EQU const_value
 
 ; OaksAideScript results
 DEF OAKS_AIDE_BAG_FULL        EQU $00

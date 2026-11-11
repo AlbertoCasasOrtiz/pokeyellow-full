@@ -31,7 +31,7 @@ HandleMenuInputPokemonSelectionDuplicate: ; unreferenced
 	ld [wCheckFor180DegreeTurn], a
 	ldh a, [hJoy5]
 	ld b, a
-	bit BIT_D_UP, a
+	bit B_PAD_UP, a
 	jr z, .checkIfDownPressed
 .upPressed
 	ld a, [wCurrentMenuItem] ; selected menu item
@@ -42,7 +42,7 @@ HandleMenuInputPokemonSelectionDuplicate: ; unreferenced
 	ld [wCurrentMenuItem], a ; move selected menu item up one space
 	jr .checkOtherKeys
 .checkIfDownPressed
-	bit 7, a
+	bit B_PAD_DOWN, a
 	jr z, .checkOtherKeys
 .downPressed
 	ld a, [wCurrentMenuItem]
@@ -59,7 +59,7 @@ HandleMenuInputPokemonSelectionDuplicate: ; unreferenced
 	jp z, .loop1
 .checkIfAButtonOrBButtonPressed
 	ldh a, [hJoy5]
-	and A_BUTTON | B_BUTTON
+	and PAD_A | PAD_B
 	jr z, .skipPlayingSound
 .AButtonOrBButtonPressed
 	ld a, SFX_PRESS_AB
@@ -75,14 +75,14 @@ HandleMenuInputPokemonSelectionDuplicate: ; unreferenced
 PlaceMenuCursorDuplicate:
 	ld a, [wTopMenuItemY]
 	and a
-	jr z, .asm_f5ac0
+	jr z, .gotTopCoord
 	hlcoord 0, 0
 	ld bc, SCREEN_WIDTH
 .loop
 	add hl, bc
 	dec a
 	jr nz, .loop
-.asm_f5ac0
+.gotTopCoord
 	ld a, [wTopMenuItemX]
 	ld b, $0
 	ld c, a
@@ -90,35 +90,35 @@ PlaceMenuCursorDuplicate:
 	push hl
 	ld a, [wLastMenuItem]
 	and a
-	jr z, .asm_f5ad5
-	ld bc, $28
+	jr z, .gotLastCursorCoord
+	ld bc, 2 * SCREEN_WIDTH
 .loop2
 	add hl, bc
 	dec a
 	jr nz, .loop2
-.asm_f5ad5
+.gotLastCursorCoord
 	ld a, [hl]
-	cp "▶"
-	jr nz, .asm_f5ade
+	cp '▶'
+	jr nz, .notCursor
 	ld a, [wTileBehindCursor]
 	ld [hl], a
-.asm_f5ade
+.notCursor
 	pop hl
 	ld a, [wCurrentMenuItem]
 	and a
-	jr z, .asm_f5aec
-	ld bc, $28
+	jr z, .gotCurrentCursorCoord
+	ld bc, 2 * SCREEN_WIDTH
 .loop3
 	add hl, bc
 	dec a
 	jr nz, .loop3
-.asm_f5aec
+.gotCurrentCursorCoord
 	ld a, [hl]
-	cp "▶"
-	jr z, .asm_f5af4
+	cp '▶'
+	jr z, .isCursor
 	ld [wTileBehindCursor], a
-.asm_f5af4
-	ld a, "▶"
+.isCursor
+	ld a, '▶'
 	ld [hl], a
 	ld a, l
 	ld [wMenuCursorLocation], a

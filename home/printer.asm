@@ -1,4 +1,3 @@
-
 PrinterSerial::
 	homecall PrinterSerial_
 	ret
@@ -10,7 +9,7 @@ SerialFunction::
 	ld a, [wPrinterOpcode]
 	and a
 	ret nz
-	ld hl, wOverworldMap + 650
+	ld hl, wHandshakeFrameDelay
 	inc [hl]
 	ld a, [hl]
 	cp $6
@@ -23,7 +22,7 @@ SerialFunction::
 	ldh [rSB], a
 	ld a, $1
 	ldh [rSC], a
-	ld a, START_TRANSFER_INTERNAL_CLOCK
+	ld a, SC_START | SC_INTERNAL
 	ldh [rSC], a
 	ret
 

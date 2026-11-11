@@ -3,7 +3,7 @@
 Audio4_PlaySound::
 	ld [wSoundID], a
 	ld a, [wSoundID]
-	cp $ff
+	cp SFX_STOP_ALL_MUSIC
 	jp z, .stopAllAudio
 	cp MAX_SFX_ID_4
 	jp z, .playSfx
@@ -57,7 +57,7 @@ Audio4_PlaySound::
 	and a
 	jr z, .playChannel
 	ld a, e
-	cp Ch8
+	cp CHAN8
 	jr nz, .notNoiseChannel
 	ld a, [wSoundID]
 	cp NOISE_INSTRUMENTS_END
@@ -124,7 +124,7 @@ Audio4_PlaySound::
 	push bc
 	ld b, 0
 	ld c, a
-	cp Ch4
+	cp CHAN4
 	jr c, .skipSettingFlag
 	ld hl, wChannelFlags1
 	add hl, bc
@@ -167,12 +167,12 @@ Audio4_PlaySound::
 	jr c, .cry
 	jr .done
 .cry
-	ld hl, wChannelSoundIDs + Ch5
+	ld hl, wChannelSoundIDs + CHAN5
 	ld [hli], a
 	ld [hli], a
 	ld [hli], a
 	ld [hl], a
-	ld hl, wChannelCommandPointers + Ch7 * 2 ; sfx wave channel pointer
+	ld hl, wChannelCommandPointers + CHAN7 * 2 ; sfx wave channel pointer
 	ld de, Audio4_CryRet
 	ld [hl], e
 	inc hl
@@ -180,10 +180,10 @@ Audio4_PlaySound::
 	ld a, [wSavedVolume]
 	and a
 	jr nz, .done
-	ldh a, [rNR50]
+	ldh a, [rAUDVOL]
 	ld [wSavedVolume], a
 	ld a, $77
-	ldh [rNR50], a ; full volume
+	ldh [rAUDVOL], a ; full volume
 .done
 	ret
 

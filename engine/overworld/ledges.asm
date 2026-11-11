@@ -1,6 +1,6 @@
 HandleLedges::
-	ld a, [wd736]
-	bit 6, a ; already jumping down ledge
+	ld a, [wMovementFlags]
+	bit BIT_LEDGE_OR_FISHING, a
 	ret nz
 	ld a, [wCurMapTileset]
 	and a ; OVERWORLD
@@ -39,10 +39,10 @@ HandleLedges::
 	ldh a, [hJoyHeld]
 	and e
 	ret z
-	ld a, $ff
+	ld a, PAD_BUTTONS | PAD_CTRL_PAD
 	ld [wJoyIgnore], a
-	ld hl, wd736
-	set 6, [hl] ; jumping down ledge
+	ld hl, wMovementFlags
+	set BIT_LEDGE_OR_FISHING, [hl]
 	call StartSimulatingJoypadStates
 	ld a, e
 	ld [wSimulatedJoypadStatesEnd], a
@@ -59,15 +59,15 @@ INCLUDE "data/tilesets/ledge_tiles.asm"
 LoadHoppingShadowOAM:
 	ld hl, vChars1 tile $7f
 	ld de, LedgeHoppingShadow
-	lb bc, BANK(LedgeHoppingShadow), (LedgeHoppingShadowEnd - LedgeHoppingShadow) / $8
+	lb bc, BANK(LedgeHoppingShadow), (LedgeHoppingShadowEnd - LedgeHoppingShadow) / TILE_1BPP_SIZE
 	call CopyVideoDataDouble
 	ld hl, LedgeHoppingShadowOAM
-	ld de, wOAMBuffer + 36 * 4
+	ld de, wShadowOAMSprite36
 	ld bc, LedgeHoppingShadowOAMEnd - LedgeHoppingShadowOAM
 	call CopyData
 	ld a, $a0
-	ld [wOAMBuffer + 38 * 4], a
-	ld [wOAMBuffer + 39 * 4], a
+	ld [wShadowOAMSprite38YCoord], a
+	ld [wShadowOAMSprite39YCoord], a
 	ret
 
 LedgeHoppingShadow:
@@ -76,5 +76,5 @@ LedgeHoppingShadowEnd:
 
 LedgeHoppingShadowOAM:
 	dbsprite  9, 11,  0,  0, $ff, 0
-	dbsprite 10, 11,  0,  0, $ff, OAM_HFLIP
+	dbsprite 10, 11,  0,  0, $ff, OAM_XFLIP
 LedgeHoppingShadowOAMEnd:

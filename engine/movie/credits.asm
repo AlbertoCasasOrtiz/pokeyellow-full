@@ -21,7 +21,7 @@ HallOfFamePC:
 	call FillFourRowsWithBlack
 	ld a, %11000000
 	ldh [rBGP], a
-	call UpdateGBCPal_BGP
+	call UpdateCGBPal_BGP
 	call EnableLCD
 	call StopAllMusic
 	ld hl, vBGMap1
@@ -38,7 +38,7 @@ HallOfFamePC:
 	ld [wNumCreditsMonsDisplayed], a
 	jp Credits
 
-FadeInCreditsText:
+FadeInCredits:
 	ld a, 1
 	ldh [hAutoBGTransferEnabled], a
 	ld hl, HoFGBPalettes
@@ -46,7 +46,7 @@ FadeInCreditsText:
 .loop
 	ld a, [hli]
 	ldh [rBGP], a
-	call UpdateGBCPal_BGP
+	call UpdateCGBPal_BGP
 	ld c, 5
 	call DelayFrames
 	dec b
@@ -54,10 +54,10 @@ FadeInCreditsText:
 	ret
 
 HoFGBPalettes:
-	db %11000000
-	db %11010000
-	db %11100000
-	db %11110000
+	dc 3, 0, 0, 0
+	dc 3, 1, 0, 0
+	dc 3, 2, 0, 0
+	dc 3, 3, 0, 0
 
 DisplayCreditsMon:
 	ld hl, vBGMap1
@@ -65,7 +65,7 @@ DisplayCreditsMon:
 	xor a
 	ldh [hAutoBGTransferEnabled], a
 	ld hl, rLCDC
-	set 3, [hl]
+	set B_LCDC_BG_MAP, [hl]
 	call SaveScreenTilesToBuffer2
 	call FillMiddleOfScreenWithWhite
 	call GetNextCreditsMon
@@ -78,9 +78,9 @@ DisplayCreditsMon:
 	call CreditsCopyTileMapToVRAM
 	ld a, %11111100 ; make the mon a black silhouette
 	ldh [rBGP], a
-	call UpdateGBCPal_BGP
+	call UpdateCGBPal_BGP
 	ld hl, rLCDC
-	res 3, [hl]
+	res B_LCDC_BG_MAP, [hl]
 	ld a, 1
 	ldh [hAutoBGTransferEnabled], a
 	ld b, 0
@@ -94,7 +94,7 @@ DisplayCreditsMon:
 	call ScrollCreditsMonLeft
 	ld a, %11000000
 	ldh [rBGP], a
-	call UpdateGBCPal_BGP
+	call UpdateCGBPal_BGP
 	xor a
 	ldh [hSCX], a
 	ret
@@ -117,8 +117,8 @@ GetNextCreditsMon:
 	ld hl, CreditsMons
 	add hl, bc
 	ld a, [hl]
-	ld [wcf91], a
-	ld [wd0b5], a
+	ld [wCurPartySpecies], a
+	ld [wCurSpecies], a
 	hlcoord 8, 6
 	call GetMonHeader
 	call LoadFrontSpriteByMonIndex
@@ -137,30 +137,33 @@ CreditsCopyTileMapToVRAM:
 
 CreditsLoadFont:
 	call LoadFontTilePatterns
-	ld hl, vChars1
+	ld hl, vFont
 	ld bc,  ($80 tiles) / 2
-	call ZeroMemory
+	call ShiftFontColorIndex
 
 	call LoadTextBoxTilePatterns
 	ld hl, vChars2 tile $60
 	ld bc, ($20 tiles) / 2
-	call ZeroMemory
+	call ShiftFontColorIndex
 
 	ld hl, vChars2 tile $7e
-	ld bc, 1 tiles
+	ld bc, TILE_SIZE
 	ld a, $ff ; solid black
 	call FillMemory
 	ret
 
-ZeroMemory:
-; zero bc bytes at hl
+ShiftFontColorIndex:
+; Zero every second byte at hl, writing a total of bc bytes.
+; When used on VRAM font characters that contain only black and white shades,
+; it shifts the color index: black -> light gray, allowing palette-controlled
+; text fade-in during the Credits roll, while the black bars remain solid.
 	ld [hl], 0
 	inc hl
 	inc hl
 	dec bc
 	ld a, b
 	or c
-	jr nz, ZeroMemory
+	jr nz, ShiftFontColorIndex
 	ret
 
 FillFourRowsWithBlack:
@@ -171,7 +174,7 @@ FillFourRowsWithBlack:
 FillMiddleOfScreenWithWhite:
 	hlcoord 0, 4
 	ld bc, SCREEN_WIDTH * 10
-	ld a, " "
+	ld a, ' '
 	jp FillMemory
 
 FillLeftHalfOfScreenWithWhite:
@@ -191,7 +194,7 @@ FillRightHalfOfScreenWithWhite:
 FillHalfOfScreenWithWhite:
 	ld b, 10
 	ld c, 10
-	ld a, " "
+	ld a, ' '
 .loop
 	push bc
 	push hl
@@ -243,7 +246,7 @@ Credits: ; Roll credits
 
 
 .fadeInTextAndShowMon
-	call FadeInCreditsText
+	call FadeInCredits
 	ld c, 102
 	jr .next1
 
@@ -255,7 +258,7 @@ Credits: ; Roll credits
 	jr .nextCreditsScreen
 
 .fadeInText
-	call FadeInCreditsText
+	call FadeInCredits
 	ld c, 132
 	jr .next2
 
@@ -275,7 +278,7 @@ ShowTheEndGFX:
 	call FillMiddleOfScreenWithWhite
 	ld de, TheEndGfx
 	ld hl, vChars2 tile $60
-	lb bc, BANK(TheEndGfx), (TheEndGfxEnd - TheEndGfx) / $10
+	lb bc, BANK(TheEndGfx), (TheEndGfxEnd - TheEndGfx) / TILE_SIZE
 	call CopyVideoData
 	hlcoord 4, 8
 	ld de, TheEndTextString
@@ -283,7 +286,7 @@ ShowTheEndGFX:
 	hlcoord 4, 9
 	inc de
 	call PlaceString
-	jp FadeInCreditsText
+	jp FadeInCredits
 
 TheEndTextString:
 ; "T H E  E N D"

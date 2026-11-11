@@ -7,7 +7,7 @@ AnimateBoulderDust:
 	ld [wUpdateSpritesEnabled], a
 	ld a, %11100100
 	ldh [rOBP1], a
-	call UpdateGBCPal_OBP1
+	call UpdateCGBPal_OBP1
 	call LoadSmokeTileFourTimes
 	farcall WriteCutOrBoulderDustAnimationOAMBlock
 	ld c, 8 ; number of steps in animation
@@ -22,7 +22,7 @@ AnimateBoulderDust:
 	ldh a, [rOBP1]
 	xor %01100100
 	ldh [rOBP1], a
-	call UpdateGBCPal_OBP1
+	call UpdateCGBPal_OBP1
 	call Delay3
 	pop bc
 	dec c
@@ -45,7 +45,7 @@ GetMoveBoulderDustFunctionPointer:
 	ld h, [hl]
 	ld l, a
 	push hl
-	ld hl, wOAMBuffer + $90
+	ld hl, wShadowOAMSprite36
 	ld d, $0
 	add hl, de
 	ld e, l
@@ -72,7 +72,7 @@ LoadSmokeTileFourTimes::
 	push hl
 	call LoadSmokeTile
 	pop hl
-	ld bc, 1 tiles
+	ld bc, TILE_SIZE
 	add hl, bc
 	pop bc
 	dec c
@@ -81,7 +81,7 @@ LoadSmokeTileFourTimes::
 
 LoadSmokeTile:
 	ld de, SSAnneSmokePuffTile
-	lb bc, BANK(SSAnneSmokePuffTile), (SSAnneSmokePuffTileEnd - SSAnneSmokePuffTile) / $10
+	lb bc, BANK(SSAnneSmokePuffTile), (SSAnneSmokePuffTileEnd - SSAnneSmokePuffTile) / TILE_SIZE
 	jp CopyVideoData
 
 SSAnneSmokePuffTile:

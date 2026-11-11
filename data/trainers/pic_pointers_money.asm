@@ -4,9 +4,9 @@ MACRO pic_money
 ENDM
 
 TrainerPicAndMoneyPointers::
-	table_width 5, TrainerPicAndMoneyPointers
+	table_width 5
 	; pic pointer, base reward money
-	; money received after battle = base money × level of highest-level enemy mon
+	; money received after battle = base money × level of last enemy mon
 	pic_money YoungsterPic,    1500
 	pic_money BugCatcherPic,   1000
 	pic_money LassPic,         1500

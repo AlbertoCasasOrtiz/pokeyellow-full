@@ -67,12 +67,12 @@ DisplayPokemartDialogue_::
 	ld [wListMenuID], a
 	call DisplayListMenuID
 	jp c, .returnToMainPokemartMenu ; if the player closed the menu
-.confirmItemSale ; if the player is trying to sell a specific item
+; if the player is trying to sell a specific item, confirm the sale
 	call IsKeyItem
 	ld a, [wIsKeyItem]
 	and a
 	jr nz, .unsellableItem
-	ld a, [wcf91]
+	ld a, [wCurItem]
 	call IsItemHM
 	jr c, .unsellableItem
 	ld a, PRICEDITEMLISTMENU
@@ -99,7 +99,7 @@ DisplayPokemartDialogue_::
 	dec a
 	jr z, .sellMenuLoop
 
-.sellItem
+; sell item
 	ld a, [wBoughtOrSoldItemInMart]
 	and a
 	jr nz, .skipSettingFlag1
@@ -156,8 +156,8 @@ DisplayPokemartDialogue_::
 	call DisplayChooseQuantityMenu
 	inc a
 	jr z, .buyMenuLoop ; if the player closed the choose quantity menu with the B button
-	ld a, [wcf91] ; item ID
-	ld [wd11e], a ; store item ID for GetItemName
+	ld a, [wCurItem]
+	ld [wNamedObjectIndex], a
 	call GetItemName
 	call CopyToStringBuffer
 	ld hl, PokemartTellBuyPriceText
@@ -177,7 +177,7 @@ DisplayPokemartDialogue_::
 	dec a
 	jr z, .buyMenuLoop
 
-.buyItem
+; buy item
 	call .isThereEnoughMoney
 	jr c, .notEnoughMoney
 	ld hl, wNumBagItems

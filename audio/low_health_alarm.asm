@@ -1,40 +1,40 @@
 Music_DoLowHealthAlarm::
 	ld a, [wLowHealthAlarm]
-	cp $ff
+	cp DISABLE_LOW_HEALTH_ALARM
 	jr z, .disableAlarm
 
-	bit 7, a  ;alarm enabled?
-	ret z     ;nope
+	bit BIT_LOW_HEALTH_ALARM, a
+	ret z
 
-	and $7f   ;low 7 bits are the timer.
-	jr nz, .asm_21383 ;if timer > 0, play low tone.
+	and LOW_HEALTH_TIMER_MASK
+	jr nz, .notToneHi ;if timer > 0, play low tone.
 
 	call .playToneHi
 	ld a, 30 ;keep this tone for 30 frames.
-	jr .asm_21395 ;reset the timer.
+	jr .resetTimer
 
-.asm_21383
+.notToneHi
 	cp 20
-	jr nz, .asm_2138a ;if timer == 20,
-	call .playToneLo  ;actually set the sound registers.
+	jr nz, .noTone   ;if timer == 20,
+	call .playToneLo ;actually set the sound registers.
 
-.asm_2138a
-	ld a, $86
-	ld [wChannelSoundIDs + Ch5], a ;disable sound channel?
+.noTone
+	ld a, CRY_SFX_END
+	ld [wChannelSoundIDs + CHAN5], a ;disable sound channel?
 	ld a, [wLowHealthAlarm]
-	and $7f ;decrement alarm timer.
+	and LOW_HEALTH_TIMER_MASK
 	dec a
 
-.asm_21395
+.resetTimer
 	; reset the timer and enable flag.
-	set 7, a
+	set BIT_LOW_HEALTH_ALARM, a
 	ld [wLowHealthAlarm], a
 	ret
 
 .disableAlarm
 	xor a
 	ld [wLowHealthAlarm], a  ;disable alarm
-	ld [wChannelSoundIDs + Ch5], a  ;re-enable sound channel?
+	ld [wChannelSoundIDs + CHAN5], a  ;re-enable sound channel?
 	ld de, .toneDataSilence
 	jr .playTone
 
@@ -49,7 +49,7 @@ Music_DoLowHealthAlarm::
 
 ;update sound channel 1 to play the alarm, overriding all other sounds.
 .playTone
-	ld hl, rNR10 ;channel 1 sound register
+	ld hl, rAUD1SWEEP ;channel 1 sound register
 	ld c, $5
 	xor a
 

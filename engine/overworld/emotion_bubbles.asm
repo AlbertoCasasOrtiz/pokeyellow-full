@@ -18,13 +18,13 @@ EmotionBubble:
 	push af
 	ld a, $ff
 	ld [wUpdateSpritesEnabled], a
-	ld a, [wd736]
-	bit 6, a ; are the last 4 OAM entries reserved for a shadow or fishing rod?
-	ld hl, wOAMBuffer + 4 * 35 + $3 ; $8f
-	ld de, wOAMBuffer + 4 * 39 + $3 ; $9f
+	ld a, [wMovementFlags]
+	bit BIT_LEDGE_OR_FISHING, a ; are the last 4 OAM entries reserved for a shadow or fishing rod?
+	ld hl, wShadowOAMSprite35Attributes
+	ld de, wShadowOAMSprite39Attributes
 	jr z, .next
-	ld hl, wOAMBuffer + 4 * 31 + $3 ; $7f
-	ld de, wOAMBuffer + 4 * 35 + $3 ; $8f
+	ld hl, wShadowOAMSprite31Attributes
+	ld de, wShadowOAMSprite35Attributes
 
 ; Copy OAM data 16 bytes forward to make room for emotion bubble OAM data at the
 ; start of the OAM buffer.
@@ -54,7 +54,7 @@ EmotionBubble:
 	add $8
 	ld c, a
 
-	ld de, EmotionBubblesOAM
+	ld de, EmotionBubblesOAMBlock
 	xor a
 	call WriteOAMBlock
 	ld c, 60
@@ -65,10 +65,12 @@ EmotionBubble:
 	call UpdateSprites
 	ret
 
-
-EmotionBubblesOAM:
-	dbsprite  0, -1,  0,  0, $f9, 0
-	dbsprite  0, -1,  0,  2, $fb, 0
+EmotionBubblesOAMBlock:
+; tile ID, attributes
+	db $f8, 0
+	db $f9, 0
+	db $fa, 0
+	db $fb, 0
 
 EmotionBubbles:
 ShockEmote:    INCBIN "gfx/emotes/shock.2bpp"

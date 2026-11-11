@@ -5,7 +5,7 @@ YesNoChoice::
 	call InitYesNoTextBoxParameters
 	jr DisplayYesNoChoice
 
-Func_35f7::
+TwoOptionMenu:: ; unreferenced
 	ld a, TWO_OPTION_MENU
 	ld [wTextBoxID], a
 	call InitYesNoTextBoxParameters
@@ -26,7 +26,7 @@ YesNoChoicePokeCenter::
 	lb bc, 8, 12
 	jr DisplayYesNoChoice
 
-WideYesNoChoice:: ; unused
+WideYesNoChoice:: ; unreferenced
 	call SaveScreenTilesToBuffer1
 	ld a, WIDE_YES_NO_MENU
 	ld [wTwoOptionMenuID], a

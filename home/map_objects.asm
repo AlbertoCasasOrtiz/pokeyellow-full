@@ -30,34 +30,32 @@ TextScript_ItemStoragePC::
 	call SaveScreenTilesToBuffer2
 	ld b, BANK(PlayerPC)
 	ld hl, PlayerPC
-	jr bankswitchAndContinue
+	jr BankswitchAndContinue
 
 TextScript_BillsPC::
 	call SaveScreenTilesToBuffer2
 	ld b, BANK(BillsPC_)
 	ld hl, BillsPC_
-	jr bankswitchAndContinue
+	jr BankswitchAndContinue
 
 TextScript_GameCornerPrizeMenu::
-; XXX find a better name for this function
-; special_F7
 	ld b, BANK(CeladonPrizeMenu)
 	ld hl, CeladonPrizeMenu
-bankswitchAndContinue::
+BankswitchAndContinue::
 	call Bankswitch
 	jp HoldTextDisplayOpen        ; continue to main text-engine function
 
 TextScript_PokemonCenterPC::
 	ld b, BANK(ActivatePC)
 	ld hl, ActivatePC
-	jr bankswitchAndContinue
+	jr BankswitchAndContinue
 
 StartSimulatingJoypadStates::
 	xor a
 	ld [wOverrideSimulatedJoypadStatesMask], a
 	ld [wSpritePlayerStateData2MovementByte1], a
-	ld hl, wd730
-	set 7, [hl]
+	ld hl, wStatusFlags5
+	set BIT_SCRIPTED_MOVEMENT_STATE, [hl]
 	ret
 
 IsItemInBag::
@@ -71,17 +69,18 @@ IsItemInBag::
 	ret
 
 IsSurfingPikachuInParty::
-; set bit 6 of wd472 if true
-; also calls Func_3467, which is a bankswitch to IsStarterPikachuInOurParty
-	ld a, [wd472]
-	and $3f
-	ld [wd472], a
+; set bit 6 of wPikachuSpawnStateFlags if any Pikachu with Surf is in party
+; set bit 7 of wPikachuSpawnStateFlags if starter Pikachu is in party (with or without Surf)
+; also performs a bankswitch to IsStarterPikachuAliveInOurParty
+	ld a, [wPikachuSpawnStateFlags]
+	and ~((1 << BIT_PIKACHU_SPAWN_STARTER) | (1 << BIT_PIKACHU_SPAWN_SURFING))
+	ld [wPikachuSpawnStateFlags], a
 	ld hl, wPartyMon1
 	ld c, PARTY_LENGTH
 	ld b, SURF
 .loop
 	ld a, [hl]
-	cp STARTER_PIKACHU
+	cp STARTER
 	jr nz, .notPikachu
 	push hl
 	ld de, $8
@@ -99,9 +98,9 @@ IsSurfingPikachuInParty::
 	cp b
 	jr nz, .noSurf
 .hasSurf
-	ld a, [wd472]
-	set 6, a
-	ld [wd472], a
+	ld a, [wPikachuSpawnStateFlags]
+	set BIT_PIKACHU_SPAWN_SURFING, a
+	ld [wPikachuSpawnStateFlags], a
 .noSurf
 	pop hl
 .notPikachu
@@ -109,23 +108,23 @@ IsSurfingPikachuInParty::
 	add hl, de
 	dec c
 	jr nz, .loop
-	call Func_3467
+	call .checkForStarter
 	ret
 
-Func_3467::
+.checkForStarter
 	push hl
 	push bc
-	callfar IsStarterPikachuInOurParty
+	callfar IsStarterPikachuAliveInOurParty
 	pop bc
 	pop hl
 	ret nc
-	ld a, [wd472]
-	set 7, a
-	ld [wd472], a
+	ld a, [wPikachuSpawnStateFlags]
+	set BIT_PIKACHU_SPAWN_STARTER, a
+	ld [wPikachuSpawnStateFlags], a
 	ret
 
 DisplayPokedex::
-	ld [wd11e], a
+	ld [wPokedexNum], a
 	farjp _DisplayPokedex
 
 SetSpriteFacingDirectionAndDelay::
@@ -147,21 +146,21 @@ SetSpriteImageIndexAfterSettingFacingDirection::
 	ld [hl], a
 	ret
 
-SpriteFunc_34a1::
+SetSpriteImageIndex::
 	ldh a, [hSpriteIndex]
 	swap a
-	add $e
+	add SPRITESTATEDATA2_IMAGEBASEOFFSET
 	ld l, a
-	ld h, $c2
+	ld h, HIGH(wSpriteStateData2)
 	ld c, [hl]
 	dec c
 	swap c
-	ldh a, [hSpriteOffset]
+	ldh a, [hSpriteImageIndex]
 	add c
 	ld c, a
-	ldh a, [hSpriteHeight]
+	ldh a, [hSpriteIndex]
 	swap a
-	add $2
+	add SPRITESTATEDATA1_IMAGEINDEX
 	ld l, a
 	dec h
 	ld [hl], c
@@ -191,7 +190,7 @@ CheckCoords::
 	ld hl, wCoordIndex
 	inc [hl]
 	pop hl
-.compareYCoord
+; compare Y coord
 	cp b
 	jr z, .compareXCoord
 	inc hl
@@ -200,7 +199,7 @@ CheckCoords::
 	ld a, [hli]
 	cp c
 	jr nz, .loop
-.inArray
+; in array
 	scf
 	ret
 .notInArray
@@ -293,15 +292,15 @@ SetSpriteMovementBytesToFE::
 SetSpriteMovementBytesToFF::
 	push hl
 	call GetSpriteMovementByte1Pointer
-	ld [hl], $FF
+	ld [hl], STAY
 	call GetSpriteMovementByte2Pointer
-	ld [hl], $FF ; prevent person from walking?
+	ld [hl], NONE
 	pop hl
 	ret
 
 ; returns the sprite movement byte 1 pointer for sprite [hSpriteIndex] in hl
 GetSpriteMovementByte1Pointer::
-	ld h, $C2
+	ld h, HIGH(wSpriteStateData2)
 	ldh a, [hSpriteIndex]
 	swap a
 	add 6

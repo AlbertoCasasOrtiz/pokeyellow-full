@@ -32,7 +32,7 @@ RedrawPartyMenu_::
 	call PlaceString ; print the pokemon's name
 	ldh a, [hPartyMonIndex]
 	ld [wWhichPokemon], a
-	callfar IsThisPartymonStarterPikachu_Party
+	callfar IsThisPartyMonStarterPikachu
 	jr nc, .regularMon
 	call CheckPikachuFollowingPlayer
 	jr z, .regularMon
@@ -59,7 +59,7 @@ RedrawPartyMenu_::
 	dec hl
 	dec hl
 	dec hl
-	ld a, "▷" ; unfilled right arrow menu cursor
+	ld a, '▷' ; unfilled right arrow menu cursor
 	ld [hli], a ; place the cursor
 	inc hl
 	inc hl
@@ -78,12 +78,12 @@ RedrawPartyMenu_::
 	push hl
 	ld bc, SCREEN_WIDTH + 1 ; down 1 row and right 1 column
 	ldh a, [hUILayoutFlags]
-	set 0, a
+	set BIT_PARTY_MENU_HP_BAR, a
 	ldh [hUILayoutFlags], a
 	add hl, bc
 	predef DrawHP2 ; draw HP bar and prints current / max HP
 	ldh a, [hUILayoutFlags]
-	res 0, a
+	res BIT_PARTY_MENU_HP_BAR, a
 	ldh [hUILayoutFlags], a
 	call SetPartyMenuHPBarColor ; color the HP bar (on SGB)
 	pop hl
@@ -110,7 +110,7 @@ RedrawPartyMenu_::
 	pop hl
 	pop de
 	inc de
-	ld bc, 2 * 20
+	ld bc, 2 * SCREEN_WIDTH
 	add hl, bc
 	pop bc
 	inc c
@@ -129,19 +129,19 @@ RedrawPartyMenu_::
 	rl b
 	ld c, a
 	add hl, bc
-	ld de, wEvosMoves
+	ld de, wEvoDataBuffer
 	ld a, BANK(EvosMovesPointerTable)
 	ld bc, 2
 	call FarCopyData
-	ld hl, wEvosMoves
+	ld hl, wEvoDataBuffer
 	ld a, [hli]
 	ld h, [hl]
 	ld l, a
-	ld de, wEvosMoves
+	ld de, wEvoDataBuffer
 	ld a, BANK(EvosMovesPointerTable)
-	ld bc, wEvosMovesEnd - wEvosMoves
+	ld bc, wEvoDataBufferEnd - wEvoDataBuffer
 	call FarCopyData
-	ld hl, wEvosMoves
+	ld hl, wEvoDataBuffer
 	ld de, .notAbleToEvolveText
 ; loop through the pokemon's evolution entries
 .checkEvolutionsLoop
@@ -150,7 +150,7 @@ RedrawPartyMenu_::
 	jr z, .placeEvolutionStoneString ; if so, place the "NOT ABLE" string
 	inc hl
 	inc hl
-	cp EV_ITEM
+	cp EVOLVE_ITEM
 	jr nz, .checkEvolutionsLoop
 ; if it's a stone evolution entry
 	dec hl
@@ -167,7 +167,7 @@ RedrawPartyMenu_::
 .placeEvolutionStoneString
 	pop hl
 	push hl
-	ld bc, 20 + 9 ; down 1 row and right 9 columns
+	ld bc, SCREEN_WIDTH + 9 ; down 1 row and right 9 columns
 	add hl, bc
 	call PlaceString
 	pop hl
@@ -180,11 +180,11 @@ RedrawPartyMenu_::
 	ld b, SET_PAL_PARTY_MENU
 	call RunPaletteCommand
 .printMessage
-	ld hl, wd730
+	ld hl, wStatusFlags5
 	ld a, [hl]
 	push af
 	push hl
-	set 6, [hl] ; turn off letter printing delay
+	set BIT_NO_TEXT_DELAY, [hl]
 	ld a, [wPartyMenuTypeOrMessageID] ; message ID
 	cp FIRST_PARTY_MENU_TEXT_ID
 	jr nc, .printItemUseMessage
