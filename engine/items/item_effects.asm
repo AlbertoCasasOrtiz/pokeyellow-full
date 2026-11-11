@@ -23,7 +23,7 @@ ItemUsePtrTable:
 	dw ItemUseBall       ; POKE_BALL
 	dw ItemUseTownMap    ; TOWN_MAP
 	dw ItemUseBicycle    ; BICYCLE
-	dw ItemUseSurfboard  ; SURFBOARD
+	dw ItemUseBoard  ; BOARD
 	dw ItemUseBall       ; SAFARI_BALL
 	dw ItemUsePokedex    ; POKEDEX
 	dw ItemUseEvoStone   ; MOON_STONE
@@ -697,7 +697,7 @@ ItemUseBicycle:
 	ret
 
 ; indirectly used by SURF in StartMenu_Pokemon.surf
-ItemUseSurfboard:
+ItemUseBoard:
 	ld a, [wWalkBikeSurfState]
 	ld [wWalkBikeSurfStateCopy], a
 	cp 2 ; is the player already surfing?

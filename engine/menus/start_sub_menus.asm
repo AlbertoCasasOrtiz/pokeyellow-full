@@ -187,7 +187,7 @@ StartMenu_Pokemon::
 	ld a, PLAYER_SURF_PIKA
 .continueSurf
 	ld [wPlayerState], a
-	ld a, SURFBOARD
+	ld a, BOARD
 	ld [wCurItem], a
 	ld [wPseudoItemID], a
 	call UseItem

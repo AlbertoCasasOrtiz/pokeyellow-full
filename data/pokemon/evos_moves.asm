@@ -628,7 +628,7 @@ SlowpokeEvosMoves:
 
 KadabraEvosMoves:
 ; Evolutions
-	db EV_LEVEL, 35, ALAKAZAM
+	db EVOLVE_LEVEL, 35, ALAKAZAM
 	db 0
 ; Learnset
 	db 16, CONFUSION
@@ -641,7 +641,7 @@ KadabraEvosMoves:
 
 GravelerEvosMoves:
 ; Evolutions
-	db EV_LEVEL, 45, GOLEM
+	db EVOLVE_LEVEL, 45, GOLEM
 	db 0
 ; Learnset
 	db 11, DEFENSE_CURL
@@ -667,7 +667,7 @@ ChanseyEvosMoves:
 
 MachokeEvosMoves:
 ; Evolutions
-	db EV_LEVEL, 45, MACHAMP
+	db EVOLVE_LEVEL, 45, MACHAMP
 	db 0
 ; Learnset
 	db 20, LOW_KICK
@@ -1720,7 +1720,7 @@ MissingNo92EvosMoves:
 
 HaunterEvosMoves:
 ; Evolutions
-	db EV_LEVEL, 50, GENGAR
+	db EVOLVE_LEVEL, 50, GENGAR
 	db 0
 ; Learnset
 	db 29, HYPNOSIS

@@ -22,7 +22,7 @@ SurfingPikachuOAMData:
 	dbw $a3, .OAMData_SurfingPikachu ; SURFPIKA_OAMSET_SMALL_SPLASH_2
 	dbw $a7, .OAMData_SmallSplash    ; SURFPIKA_OAMSET_BIG_SPLASH_1
 	dbw $a8, .OAMData_LargeSplash    ; SURFPIKA_OAMSET_BIG_SPLASH_2
-	dbw $98, .OAMData_EmptySurfboard ; SURFPIKA_OAMSET_BIG_SPLASH_3
+	dbw $98, .OAMData_EmptyBoard ; SURFPIKA_OAMSET_BIG_SPLASH_3
 	dbw $e0, .OAMData_AnnouncedText  ; SURFPIKA_OAMSET_START_TEXT
 	dbw $e6, .OAMData_AnnouncedText  ; SURFPIKA_OAMSET_GOAL_TEXT
 	dbw $ca, .OAMData_AnnouncedText  ; SURFPIKA_OAMSET_OH_NO_TEXT
@@ -100,7 +100,7 @@ SurfingPikachuOAMData:
 	db   4,   0, $21, OAM_PAL1 | OAM_XFLIP
 	db   4,   8, $20, OAM_PAL1 | OAM_XFLIP
 
-.OAMData_EmptySurfboard:
+.OAMData_EmptyBoard:
 	db 3
 	db   4, -12, $00, 0
 	db   4,  -4, $01, 0

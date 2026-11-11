@@ -6,7 +6,7 @@ KeyItemFlags:
 	dbit FALSE ; POKE_BALL
 	dbit TRUE  ; TOWN_MAP
 	dbit TRUE  ; BICYCLE
-	dbit TRUE  ; SURFBOARD
+	dbit TRUE  ; BOARD
 	dbit TRUE  ; SAFARI_BALL
 	dbit TRUE  ; POKEDEX
 	dbit FALSE ; MOON_STONE
