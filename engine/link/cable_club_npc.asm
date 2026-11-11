@@ -2,11 +2,11 @@ CableClubNPC::
 	ld hl, CableClubNPCWelcomeText
 	call PrintText
 	call CheckPikachuFollowingPlayer
-	jr nz, .asm_7048
+	jr nz, .pikachuIsAsleep
 	CheckEvent EVENT_GOT_POKEDEX
 	jp nz, .receivedPokedex
 ; if the player hasn't received the pokedex
-.asm_7048
+.pikachuIsAsleep
 	ld c, 60
 	call DelayFrames
 	ld hl, CableClubNPCMakingPreparationsText
@@ -29,7 +29,7 @@ CableClubNPC::
 	ldh [rSB], a
 	xor a
 	ldh [hSerialReceiveData], a
-	ld a, START_TRANSFER_EXTERNAL_CLOCK
+	ld a, SC_START | SC_EXTERNAL
 ; This vc_hook causes the Virtual Console to set [hSerialConnectionStatus] to
 ; USING_INTERNAL_CLOCK, which allows the player to proceed past the link
 ; receptionist's "Please wait." It assumes that hSerialConnectionStatus is at
@@ -46,7 +46,7 @@ CableClubNPC::
 	jr z, .failedToEstablishConnection
 	ld a, ESTABLISH_CONNECTION_WITH_INTERNAL_CLOCK
 	ldh [rSB], a
-	ld a, START_TRANSFER_INTERNAL_CLOCK
+	ld a, SC_START | SC_INTERNAL
 	ldh [rSC], a
 	call DelayFrame
 	jr .establishConnectionLoop
@@ -67,13 +67,13 @@ CableClubNPC::
 	and a
 	jr nz, .choseNo
 	vc_hook Wireless_TryQuickSave_block_input
-	callfar SaveSAVtoSRAM
+	callfar SaveGameData
 	call WaitForSoundToFinish
 	ld a, SFX_SAVE
 	call PlaySoundWaitForCurrent
 	ld hl, CableClubNPCPleaseWaitText
 	call PrintText
-	ld hl, wUnknownSerialCounter
+	ld hl, wLinkTimeoutFrames
 	ld a, $3
 	ld [hli], a
 	xor a
@@ -83,7 +83,7 @@ CableClubNPC::
 	vc_hook Wireless_prompt
 	call Serial_SyncAndExchangeNybble
 	vc_hook Wireless_net_recheck
-	ld hl, wUnknownSerialCounter
+	ld hl, wLinkTimeoutFrames
 	ld a, [hli]
 	inc a
 	jr nz, .connected
@@ -110,11 +110,11 @@ CableClubNPC::
 	call PrintText
 .didNotConnect
 	xor a
-	ld hl, wUnknownSerialCounter
+	ld hl, wLinkTimeoutFrames
 	ld [hli], a
 	ld [hl], a
-	ld hl, wd72e
-	res 6, [hl]
+	ld hl, wStatusFlags4
+	res BIT_LINK_CONNECTED, [hl]
 	xor a
 	ld [wMenuJoypadPollCount], a
 	ret
@@ -137,14 +137,14 @@ Serial_SyncAndExchangeNybbleDouble:
 	call Serial_ExchangeNybble
 	call DelayFrame
 	push hl
-	ld hl, wUnknownSerialCounter + 1
+	ld hl, wLinkTimeoutFrames + 1
 	dec [hl]
 	jr nz, .next
 	dec hl
 	dec [hl]
 	jr nz, .next
 	pop hl
-	jr .setUnknownSerialCounterToFFFF
+	jr .serialDisconnected
 .next
 	pop hl
 	ld a, [wSerialExchangeNybbleReceiveData]
@@ -172,10 +172,10 @@ Serial_SyncAndExchangeNybbleDouble:
 	ld a, [wSerialExchangeNybbleReceiveData]
 	ld [wSerialSyncAndExchangeNybbleReceiveData], a
 	ret
-.setUnknownSerialCounterToFFFF
+.serialDisconnected
 	ld a, $ff
-	ld [wUnknownSerialCounter], a
-	ld [wUnknownSerialCounter + 1], a
+	ld [wLinkTimeoutFrames], a
+	ld [wLinkTimeoutFrames + 1], a
 	ret
 
 CableClubNPCAreaReservedFor2FriendsLinkedByCableText:
@@ -215,6 +215,6 @@ CloseLinkConnection:
 	ldh [rSB], a
 	xor a
 	ldh [hSerialReceiveData], a
-	ld a, START_TRANSFER_EXTERNAL_CLOCK
+	ld a, SC_START | SC_EXTERNAL
 	ldh [rSC], a
 	ret

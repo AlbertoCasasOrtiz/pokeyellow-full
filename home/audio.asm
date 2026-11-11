@@ -10,8 +10,8 @@ PlayDefaultMusicFadeOutCurrent::
 ; Fade out the current music and then play the default music.
 	ld c, 10
 	ld d, 0
-	ld a, [wd72e]
-	bit 5, a ; has a battle just ended?
+	ld a, [wStatusFlags4]
+	bit BIT_BATTLE_OVER_OR_BLACKOUT, a
 	jr z, PlayDefaultMusicCommon
 	xor a
 	ld [wLastMusicSoundID], a
@@ -138,13 +138,13 @@ PlayMusic::
 	ld a, b
 	jr PlaySound
 
-Func_2223::
+ClearMusic:: ; unreferenced
 	xor a
-	ld [wChannelSoundIDs + Ch5], a
-	ld [wChannelSoundIDs + Ch6], a
-	ld [wChannelSoundIDs + Ch7], a
-	ld [wChannelSoundIDs + Ch8], a
-	ldh [rNR10], a
+	ld [wChannelSoundIDs + CHAN5], a
+	ld [wChannelSoundIDs + CHAN6], a
+	ld [wChannelSoundIDs + CHAN7], a
+	ld [wChannelSoundIDs + CHAN8], a
+	ldh [rAUD1SWEEP], a
 	ret
 
 StopAllMusic::
@@ -160,10 +160,10 @@ PlaySound::
 	and a
 	jr z, .next
 	xor a
-	ld [wChannelSoundIDs + Ch5], a
-	ld [wChannelSoundIDs + Ch6], a
-	ld [wChannelSoundIDs + Ch7], a
-	ld [wChannelSoundIDs + Ch8], a
+	ld [wChannelSoundIDs + CHAN5], a
+	ld [wChannelSoundIDs + CHAN6], a
+	ld [wChannelSoundIDs + CHAN7], a
+	ld [wChannelSoundIDs + CHAN8], a
 .next
 	ld a, [wAudioFadeOutControl]
 	and a ; has a fade-out length been specified?

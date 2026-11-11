@@ -1,8 +1,8 @@
 PrepareOAMData::
 ; Determine OAM data for currently visible
-; sprites and write it to wOAMBuffer.
+; sprites and write it to wShadowOAM.
 ; Yellow code has been changed to use registers more efficiently
-; as well as tweaking the code to show gbc palettes
+; as well as tweaking the code to show cgb palettes
 
 	ld a, [wUpdateSpritesEnabled]
 	dec a
@@ -30,7 +30,7 @@ PrepareOAMData::
 	inc e
 	inc e
 	ld a, [de] ; [x#SPRITESTATEDATA1_IMAGEINDEX]
-	ld [wd5cd], a
+	ld [wSavedSpriteImageIndex], a
 	cp $ff ; off-screen (don't draw)
 	jr nz, .visible
 
@@ -69,21 +69,20 @@ PrepareOAMData::
 	ldh [hSpritePriority], a ; temp store sprite priority
 	pop de
 
-
 	call GetSpriteScreenXY
 
 	ldh a, [hOAMBufferOffset]
 	add [hl]
 	cp $a0
 	jr z, .hidden
-	jr nc, .asm_4a41
+	jr nc, .clearUnusedOAM
 .hidden
-	call Func_4a7b
-	ld [wd5cd], a
+	call GetSpriteImageIndex
+	ld [wSavedSpriteImageIndex], a
 	ldh a, [hOAMBufferOffset]
 
 	ld e, a
-	ld d, HIGH(wOAMBuffer)
+	ld d, HIGH(wShadowOAM)
 
 .tileLoop
 	ld a, [hli]
@@ -101,25 +100,25 @@ PrepareOAMData::
 	ld [de], a
 	inc hl
 	inc e
-	ld a, [wd5cd]
+	ld a, [wSavedSpriteImageIndex]
 	add [hl]
 	cp $80
-	jr c, .asm_4a1c
+	jr c, .notPikachuSprite
 	ld b, a
 	ldh a, [hPikachuSpriteVRAMOffset]
 	add b
-.asm_4a1c
+.notPikachuSprite
 	ld [de], a ; tile id
 	inc hl
 	inc e
 	ld a, [hl]
-	bit 1, a ; is the tile allowed to set the sprite priority bit?
+	bit BIT_SPRITE_UNDER_GRASS, a
 	jr z, .skipPriority
 	ldh a, [hSpritePriority]
 	or [hl]
 .skipPriority
 	and $f0
-	bit OAM_OBP_NUM, a
+	bit B_OAM_PAL1, a
 	jr z, .spriteusesOBP0
 	or OAM_HIGH_PALS
 .spriteusesOBP0
@@ -137,23 +136,22 @@ PrepareOAMData::
 	cp LOW($100)
 	jp nz, .spriteLoop
 
-	; Clear unused OAM.
-.asm_4a41
-	ld a, [wd736]
-	bit 6, a ; jumping down ledge or fishing animation?
-	ld c, $a0
+.clearUnusedOAM
+	ld a, [wMovementFlags]
+	bit BIT_LEDGE_OR_FISHING, a
+	ld c, LOW(wShadowOAMEnd)
 	jr z, .clear
 
 ; Don't clear the last 4 entries because they are used for the shadow in the
 ; jumping down ledge animation and the rod in the fishing animation.
-	ld c, $90
+	ld c, LOW(wShadowOAMSprite36)
 
 .clear
 	ldh a, [hOAMBufferOffset]
 	cp c
 	ret nc
 	ld l, a
-	ld h, HIGH(wOAMBuffer)
+	ld h, HIGH(wShadowOAM)
 	ld a, c
 	ld de, $4 ; entry size
 	ld b, $a0
@@ -186,9 +184,9 @@ GetSpriteScreenXY:
 	ld [de], a  ; [x#SPRITESTATEDATA1_XADJUSTED]
 	ret
 
-Func_4a7b:
+GetSpriteImageIndex:
 	push bc
-	ld a, [wd5cd]            ; temp copy of [x#SPRITESTATEDATA1_IMAGEINDEX]
+	ld a, [wSavedSpriteImageIndex]
 	swap a                   ; high nybble determines sprite used (0 is always player sprite, next are some npcs)
 	and $f
 

@@ -1,6 +1,6 @@
 RespawnOverworldPikachu:
-	callfar IsThisPartymonStarterPikachu_Party
+	callfar IsThisPartyMonStarterPikachu
 	ret nc
-	ld a, $3
+	ld a, PIKACHU_SPAWN_DELAYED
 	ld [wPikachuSpawnState], a
 	ret

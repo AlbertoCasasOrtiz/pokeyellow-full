@@ -12,10 +12,10 @@ PrintBeginningBattleText:
 	cp BATTLE_TYPE_PIKACHU
 	jr nz, .notPikachuBattle
 	callfar IsPlayerPikachuAsleepInParty
-	ld e, $24
-	jr c, .asm_f4026
-	ld e, $a
-.asm_f4026
+	ldpikacry e, PikachuCry37
+	jr c, .gotPikaCry
+	ldpikacry e, PikachuCry11
+.gotPikaCry
 	callfar PlayPikachuSoundClip
 	jr .continue
 .notPikachuBattle
@@ -48,7 +48,7 @@ PrintBeginningBattleText:
 	ld b, SILPH_SCOPE
 	call IsItemInBag
 	ld a, [wEnemyMonSpecies2]
-	ld [wcf91], a
+	ld [wCurPartySpecies], a
 	cp RESTLESS_SOUL
 	jr z, .isMarowak
 	ld a, b
@@ -80,7 +80,7 @@ PrintBeginningBattleText:
 	ld [wFrequencyModifier], a
 	ld a, $80
 	ld [wTempoModifier], a
-	ld a, SFX_SILPH_SCOPE
+	ld a, SFX_TRAINER_APPEARED
 	call PlaySound
 	jp WaitForSoundToFinish
 .done

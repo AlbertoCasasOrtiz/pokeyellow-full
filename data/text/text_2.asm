@@ -10,7 +10,7 @@ _AIBattleUseItemText::
 	text_ram wTrainerName
 	text_start
 	line "used @"
-	text_ram wcd6d
+	text_ram wNameBuffer
 	text_start
 	cont "on @"
 	text_ram wEnemyMonNick
@@ -45,7 +45,7 @@ _TradeSendsText::
 	text_ram wLinkEnemyTrainerName
 	text " sends"
 	line "@"
-	text_ram wcd6d
+	text_ram wNameBuffer
 	text "."
 	done
 
@@ -56,7 +56,7 @@ _TradeWavesFarewellText::
 	done
 
 _TradeTransferredText::
-	text_ram wcd6d
+	text_ram wNameBuffer
 	text " is"
 	line "transferred."
 	done
@@ -64,7 +64,7 @@ _TradeTransferredText::
 _TradeTakeCareText::
 	text "Take good care of"
 	line "@"
-	text_ram wcd6d
+	text_ram wNameBuffer
 	text "."
 	done
 
@@ -72,7 +72,7 @@ _TradeWillTradeText::
 	text_ram wLinkEnemyTrainerName
 	text " will"
 	line "trade @"
-	text_ram wcd6d
+	text_ram wNameBuffer
 	text_start
 	done
 
@@ -796,7 +796,7 @@ _VermilionGymTrashFailText::
 _FoundHiddenItemText::
 	text "<PLAYER> found"
 	line "@"
-	text_ram wcd6d
+	text_ram wNameBuffer
 	text "!@"
 	text_end
 
@@ -822,6 +822,7 @@ _FoundHiddenCoins2Text::
 
 _DroppedHiddenCoinsText::
 	text_start
+
 	para "Oops! Dropped"
 	line "some coins!"
 	done
@@ -957,7 +958,7 @@ _TrainerAboutToUseText::
 	text_ram wTrainerName
 	text " is"
 	line "about to use"
-	cont"@"
+	cont "@"
 	text_ram wEnemyMonNick
 	text "!"
 
@@ -1026,7 +1027,7 @@ _NoMovesLeftText::
 _MultiHitText::
 	text "Hit the enemy"
 	line "@"
-	text_decimal wPlayerNumHits,1,1
+	text_decimal wPlayerNumHits, 1, 1
 	text " times!"
 	prompt
 
@@ -1119,26 +1120,26 @@ _CantMoveText::
 _MoveIsDisabledText::
 	text "<USER>'s"
 	line "@"
-	text_ram wcd6d
+	text_ram wNameBuffer
 	text " is"
 	cont "disabled!"
 	prompt
 
-_MonName1Text::
+_ActorNameText::
 	text "<USER>@"
 	text_end
 
-_Used1Text::
+_UsedMove1Text::
 	text_start
 	line "used @"
 	text_end
 
-_Used2Text::
+_UsedMove2Text::
 	text_start
 	line "used @"
 	text_end
 
-_InsteadText::
+_UsedInsteadText::
 	text "instead,"
 	cont "@"
 	text_end
@@ -1147,23 +1148,23 @@ _MoveNameText::
 	text_ram wStringBuffer
 	text "@"
 
-_ExclamationPoint1Text::
+_EndUsedMove1Text::
 	text "!"
 	done
 
-_ExclamationPoint2Text::
+_EndUsedMove2Text::
 	text "!"
 	done
 
-_ExclamationPoint3Text::
+_EndUsedMove3Text::
 	text "!"
 	done
 
-_ExclamationPoint4Text::
+_EndUsedMove4Text::
 	text "!"
 	done
 
-_ExclamationPoint5Text::
+_EndUsedMove5Text::
 	text "!"
 	done
 
@@ -1254,7 +1255,7 @@ _HitXTimesText::
 	prompt
 
 _GainedText::
-	text_ram wcd6d
+	text_ram wNameBuffer
 	text " gained"
 	line "@"
 	text_end
@@ -1275,10 +1276,10 @@ _ExpPointsText::
 	prompt
 
 _GrewLevelText::
-	text_ram wcd6d
+	text_ram wNameBuffer
 	text " grew"
 	line "to level @"
-	text_decimal wCurEnemyLVL, 1, 3
+	text_decimal wCurEnemyLevel, 1, 3
 	text "!@"
 	text_end
 

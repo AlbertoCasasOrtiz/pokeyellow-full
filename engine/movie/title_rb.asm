@@ -1,4 +1,4 @@
-; Leftover of Red/Blue. Seemingly unused
+; Leftover of Red/Blue. All unreferenced
 
 TitleScroll_WaitBall:
 ; Wait around for the TitleBall animation to play out.
@@ -26,12 +26,12 @@ TitleScroll:
 	ld e, 0 ; don't animate titleball
 
 	and a
-	jr nz, .ok
+	jr nz, _TitleScroll
 
 	ld bc, TitleScroll_Out
 	ld d, $00
 	ld e, 0 ; don't animate titleball
-.ok
+	; fallthrough
 
 _TitleScroll:
 	ld a, [bc]
@@ -91,7 +91,7 @@ TitleBallYTable:
 
 TitleScreenAnimateBallIfStarterOut:
 ; Animate the TitleBall if a starter just got scrolled out.
-	ld a, [wTitleScreenScene]
+	ld a, [wUnusedTitleMonSpecies]
 	cp CHARMANDER ; starter 1
 	jr z, .ok
 	cp SQUIRTLE ; starter 2
@@ -117,6 +117,6 @@ GetTitleBallY:
 	pop de
 	and a
 	ret z
-	ld [wOAMBuffer + $28], a
+	ld [wShadowOAMSprite10YCoord], a
 	inc e
 	ret

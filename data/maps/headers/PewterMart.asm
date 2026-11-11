@@ -1,3 +1,2 @@
-
-	map_header PewterMart, PEWTER_MART, MART, 0
+	map_header PewterMart, PEWTER_MART, MART
 	end_map_header

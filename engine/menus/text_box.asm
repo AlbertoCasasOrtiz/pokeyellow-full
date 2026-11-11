@@ -37,14 +37,14 @@ DisplayTextBoxID_::
 	call TextBoxBorder
 	pop hl
 	call GetTextBoxIDText
-	ld a, [wd730]
+	ld a, [wStatusFlags5]
 	push af
-	ld a, [wd730]
-	set 6, a ; no pauses between printing each letter
-	ld [wd730], a
+	ld a, [wStatusFlags5]
+	set BIT_NO_TEXT_DELAY, a
+	ld [wStatusFlags5], a
 	call PlaceString
 	pop af
-	ld [wd730], a
+	ld [wStatusFlags5], a
 	call UpdateSprites
 	ret
 
@@ -112,7 +112,7 @@ GetTextBoxIDText:
 GetAddressOfScreenCoords:
 	push bc
 	hlcoord 0, 0
-	ld bc, 20
+	ld bc, SCREEN_WIDTH
 .loop ; loop to add d rows to the base address
 	ld a, d
 	and a
@@ -128,8 +128,8 @@ GetAddressOfScreenCoords:
 INCLUDE "data/text_boxes.asm"
 
 DisplayMoneyBox:
-	ld hl, wd730
-	set 6, [hl]
+	ld hl, wStatusFlags5
+	set BIT_NO_TEXT_DELAY, [hl]
 	ld a, MONEY_BOX_TEMPLATE
 	ld [wTextBoxID], a
 	call DisplayTextBoxID
@@ -138,25 +138,25 @@ DisplayMoneyBox:
 	call ClearScreenArea
 	hlcoord 12, 1
 	ld de, wPlayerMoney
-	ld c, $a3
+	ld c, 3 | LEADING_ZEROES | MONEY_SIGN
 	call PrintBCDNumber
-	ld hl, wd730
-	res 6, [hl]
+	ld hl, wStatusFlags5
+	res BIT_NO_TEXT_DELAY, [hl]
 	ret
 
 CurrencyString:
 	db "      ¥@"
 
 DoBuySellQuitMenu:
-	ld a, [wd730]
-	set 6, a ; no printing delay
-	ld [wd730], a
+	ld a, [wStatusFlags5]
+	set BIT_NO_TEXT_DELAY, a
+	ld [wStatusFlags5], a
 	xor a
 	ld [wChosenMenuItem], a
 	ld a, BUY_SELL_QUIT_MENU_TEMPLATE
 	ld [wTextBoxID], a
 	call DisplayTextBoxID
-	ld a, A_BUTTON | B_BUTTON
+	ld a, PAD_A | PAD_B
 	ld [wMenuWatchedKeys], a
 	ld a, $2
 	ld [wMaxMenuItem], a
@@ -168,14 +168,14 @@ DoBuySellQuitMenu:
 	ld [wCurrentMenuItem], a
 	ld [wLastMenuItem], a
 	ld [wMenuWatchMovingOutOfBounds], a
-	ld a, [wd730]
-	res 6, a ; turn on the printing delay
-	ld [wd730], a
+	ld a, [wStatusFlags5]
+	res BIT_NO_TEXT_DELAY, a
+	ld [wStatusFlags5], a
 	call HandleMenuInput
 	call PlaceUnfilledArrowMenuCursor
-	bit 0, a ; was A pressed?
+	bit B_PAD_A, a
 	jr nz, .pressedA
-	bit 1, a ; was B pressed? (always true since only A/B are watched)
+	bit B_PAD_B, a ; always true since only A/B are watched
 	jr z, .pressedA
 	ld a, CANCELLED_MENU
 	ld [wMenuExitMethod], a
@@ -204,16 +204,16 @@ DoBuySellQuitMenu:
 ; hl = address where the text box border should be drawn
 DisplayTwoOptionMenu:
 	push hl
-	ld a, [wd730]
-	set 6, a ; no printing delay
-	ld [wd730], a
+	ld a, [wStatusFlags5]
+	set BIT_NO_TEXT_DELAY, a
+	ld [wStatusFlags5], a
 
 ; pointless because both values are overwritten before they are read
 	xor a
 	ld [wChosenMenuItem], a
 	ld [wMenuExitMethod], a
 
-	ld a, A_BUTTON | B_BUTTON
+	ld a, PAD_A | PAD_B
 	ld [wMenuWatchedKeys], a
 	ld a, $1
 	ld [wMaxMenuItem], a
@@ -226,8 +226,8 @@ DisplayTwoOptionMenu:
 	ld [wMenuWatchMovingOutOfBounds], a
 	push hl
 	ld hl, wTwoOptionMenuID
-	bit 7, [hl] ; select second menu item by default?
-	res 7, [hl]
+	bit BIT_SECOND_MENU_OPTION_DEFAULT, [hl]
+	res BIT_SECOND_MENU_OPTION_DEFAULT, [hl]
 	jr z, .storeCurrentMenuItem
 	inc a
 .storeCurrentMenuItem
@@ -265,9 +265,9 @@ DisplayTwoOptionMenu:
 	pop hl
 	ld a, [hli]
 	and a ; put blank line before first menu item?
-	ld bc, 20 + 2
+	ld bc, SCREEN_WIDTH + 2
 	jr z, .noBlankLine
-	ld bc, 2 * 20 + 2
+	ld bc, 2 * SCREEN_WIDTH + 2
 .noBlankLine
 	ld a, [hli]
 	ld e, a
@@ -278,13 +278,13 @@ DisplayTwoOptionMenu:
 	call PlaceString
 	xor a
 	ld [wTwoOptionMenuID], a
-	ld hl, wd730
-	res 6, [hl] ; turn on the printing delay
+	ld hl, wStatusFlags5
+	res BIT_NO_TEXT_DELAY, [hl]
 	call HandleMenuInput
 	pop hl
-	bit 1, a ; A button pressed?
+	bit B_PAD_B, a
 	jr nz, .choseSecondMenuItem ; automatically choose the second option if B is pressed
-.pressedAButton
+; pressed A button
 	ld a, [wCurrentMenuItem]
 	ld [wChosenMenuItem], a
 	and a
@@ -442,7 +442,7 @@ DisplayFieldMoveMonMenu:
 	jr z, .reachedName
 .skipNameLoop ; skip past current name
 	ld a, [hli]
-	cp "@"
+	cp '@'
 	jr nz, .skipNameLoop
 	jr .skipNamesLoop
 .reachedName
@@ -481,7 +481,7 @@ PokemonMenuEntries:
 GetMonFieldMoves:
 	ld a, [wWhichPokemon]
 	ld hl, wPartyMon1Moves
-	ld bc, wPartyMon2 - wPartyMon1
+	ld bc, PARTYMON_STRUCT_LENGTH
 	call AddNTimes
 	ld d, h
 	ld e, l

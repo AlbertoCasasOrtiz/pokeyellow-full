@@ -59,7 +59,7 @@ ROMX $7
 	"Maps 3"
 	"bank7"
 	"Maps 4"
-	"Hidden Objects 1"
+	"Hidden Events 1"
 ROMX $8
 	"Sound Effect Headers 2"
 	"Music Headers 2"
@@ -97,11 +97,11 @@ ROMX $12
 	"Maps 7"
 	"Maps 8"
 ROMX $13
-	"Pics 6"
+	"Trainer Pics"
 	"Maps 9"
 ROMX $14
 	"Maps 10"
-	"Hidden Objects 2"
+	"Hidden Events 2"
 ROMX $15
 	"Maps 11"
 	"Battle Engine 7"
@@ -117,12 +117,12 @@ ROMX $17
 	"Maps 15"
 	"Starter Dex"
 	"Maps 16"
-	"Hidden Objects 3"
+	"Hidden Events 3"
 ROMX $18
 	"Maps 17"
 	"Cinnabar Lab Fossils"
 	"Maps 18"
-	"Hidden Objects 4"
+	"Hidden Events 4"
 ROMX $19
 	"Tilesets 1"
 ROMX $1A
@@ -151,6 +151,7 @@ ROMX $20
 	"Sound Effect Headers 4"
 	"Music Headers 4"
 	"Sound Effects 4"
+	"Surfing Pikachu Graphics"
 	"Audio Engine 4"
 	"Music 4"
 ROMX $21
@@ -211,12 +212,13 @@ ROMX $3A
 ; bank $3B is empty
 ROMX $3C
 	"Pikachu PCM"
+	"bank3C"
 	"Tilesets 4"
 	"Try Pikachu Movement"
 	"Pikachu Graphics 2"
 	"Credits"
 	"Maps 22"
-	"Hidden Objects Core"
+	"Hidden Events Core"
 ROMX $3D
 	"Battle Engine 8"
 	"Pics 7"
@@ -238,7 +240,7 @@ WRAM0
 	"Party Data"
 	"Main Data"
 	"Current Box Data"
-	"GBC Palette Data"
+	"CGB Palette Data"
 	org $df15
 	"Stack"
 VRAM $0

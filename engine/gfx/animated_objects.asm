@@ -28,10 +28,10 @@ RunObjectAnimations:
 	jr nz, .loop
 	ld a, [wCurrentAnimatedObjectOAMBufferOffset]
 	ld l, a
-	ld h, HIGH(wOAMBuffer)
+	ld h, HIGH(wShadowOAM)
 .deinit_unused_oam_loop
 	ld a, l
-	cp LOW(wOAMBufferEnd)
+	cp LOW(wShadowOAMEnd)
 	jr nc, .quit
 	xor a
 	ld [hli], a
@@ -158,7 +158,7 @@ UpdateCurrentAnimatedObjectFrame:
 	push bc
 	ld a, [wCurrentAnimatedObjectOAMBufferOffset]
 	ld e, a
-	ld d, HIGH(wOAMBuffer)
+	ld d, HIGH(wShadowOAM)
 	ld a, [hli]
 	ld c, a
 .loop
@@ -195,7 +195,7 @@ UpdateCurrentAnimatedObjectFrame:
 	inc de
 	call SetCurrentAnimatedObjectOAMAttributes
 	ld b, a
-	ld a, [wc634]
+	ld a, [wYellowIntroCurrentScene]
 	cp $7
 	ld a, b
 	jr z, .skip_load
@@ -205,7 +205,7 @@ UpdateCurrentAnimatedObjectFrame:
 	inc de
 	ld a, e
 	ld [wCurrentAnimatedObjectOAMBufferOffset], a
-	cp LOW(wOAMBufferEnd)
+	cp LOW(wShadowOAMEnd)
 	jr nc, .oam_is_full
 	dec c
 	jr nz, .loop
@@ -227,7 +227,7 @@ GetCurrentAnimatedObjectTileYCoordinate:
 	push hl
 	ld a, [hl]
 	ld hl, wCurAnimatedObjectOAMAttributes
-	bit 6, [hl]
+	bit B_OAM_YFLIP, [hl]
 	jr z, .no_flip
 	add $8
 	xor $ff
@@ -240,7 +240,7 @@ GetCurrentAnimatedObjectTileXCoordinate:
 	push hl
 	ld a, [hl]
 	ld hl, wCurAnimatedObjectOAMAttributes
-	bit 5, [hl]
+	bit B_OAM_XFLIP, [hl]
 	jr z, .no_flip
 	add $8
 	xor $ff
@@ -254,14 +254,14 @@ SetCurrentAnimatedObjectOAMAttributes:
 	ld b, a
 	ld a, [hl]
 	xor b
-	and $e0
+	and OAM_XFLIP | OAM_YFLIP | OAM_PRIO
 	ld b, a
 	ld a, [hl]
-	and $10
+	and OAM_PAL1
 	or b
-	bit 4, a
+	bit B_OAM_PAL1, a
 	ret z
-	or $4
+	or OAM_HIGH_PALS
 	ret
 
 GetCurrentAnimatedObjectOAMDataPointer:

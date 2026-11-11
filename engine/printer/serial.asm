@@ -42,28 +42,28 @@ PrinterTransmissionJumptable:
 	jp hl
 
 .Jumptable:
-	dw Printer_InitSerial ; 00
-	dw Printer_CheckConnectionStatus ; 01
-	dw Printer_WaitSerial ; 02
+	dw Printer_InitSerial               ; 00
+	dw Printer_CheckConnectionStatus    ; 01
+	dw Printer_WaitSerial               ; 02
 	dw Printer_StartTransmittingTilemap ; 03
-	dw Printer_TransmissionLoop ; 04
-	dw Printer_WaitSerialAndLoopBack2 ; 05
-	dw Printer_EndTilemapTransmission ; 06
-	dw Printer_TransmissionLoop ; 07
-	dw Printer_WaitSerial ; 08
+	dw Printer_TransmissionLoop         ; 04
+	dw Printer_WaitSerialAndLoopBack2   ; 05
+	dw Printer_EndTilemapTransmission   ; 06
+	dw Printer_TransmissionLoop         ; 07
+	dw Printer_WaitSerial               ; 08
 
-	dw Printer_SignalSendHeader ; 09
-	dw Printer_TransmissionLoop ; 0a
-	dw Printer_WaitSerial ; 0b
-	dw Printer_WaitUntilFinished ; 0c
-	dw Printer_Quit ; 0d
+	dw Printer_SignalSendHeader         ; 09
+	dw Printer_TransmissionLoop         ; 0a
+	dw Printer_WaitSerial               ; 0b
+	dw Printer_WaitUntilFinished        ; 0c
+	dw Printer_Quit                     ; 0d
 
-	dw Printer_Next_ ; 0e
-	dw Printer_WaitSerial ; 0f
-	dw Printer_SignalLoopBack ; 10
-	dw Printer_LoopBack ; 11
-	dw Printer_WaitLoopBack ; 12
-	dw Printer_WaitLoopBack_ ; 13
+	dw Printer_Next_                    ; 0e
+	dw Printer_WaitSerial               ; 0f
+	dw Printer_SignalLoopBack           ; 10
+	dw Printer_LoopBack                 ; 11
+	dw Printer_WaitLoopBack             ; 12
+	dw Printer_WaitLoopBack_            ; 13
 
 Printer_Next:
 	ld hl, wPrinterSendState
@@ -143,9 +143,9 @@ Printer_SignalSendHeader:
 	ld hl, PrinterDataPacket2
 	call CopyPrinterDataHeader
 	call Printer_StageHeaderForSend
-	ld a, $4
+	ld a, LOW(4)
 	ld [wPrinterDataSize], a
-	ld a, $0
+	ld a, HIGH(4)
 	ld [wPrinterDataSize + 1], a
 	call ComputePrinterChecksum
 	call Printer_Next
@@ -198,17 +198,18 @@ Printer_CheckConnectionStatus:
 	ret nz
 	ld a, [wPrinterHandshake]
 	cp $ff
-	jr nz, .asm_e88dc
+	jr nz, .printer_connected
 	ld a, [wPrinterStatusFlags]
 	cp $ff
-	jr z, .asm_e88f8
-.asm_e88dc
+	jr z, .printer_error
+
+.printer_connected
 	ld a, [wPrinterHandshake]
 	cp $81
-	jr nz, .asm_e88f8
+	jr nz, .printer_error
 	ld a, [wPrinterStatusFlags]
 	cp $0
-	jr nz, .asm_e88f8
+	jr nz, .printer_error
 	ld hl, wPrinterConnectionOpen
 	set 1, [hl]
 	ld a, $5
@@ -216,7 +217,7 @@ Printer_CheckConnectionStatus:
 	call Printer_Next
 	ret
 
-.asm_e88f8
+.printer_error
 	ld a, $ff
 	ld [wPrinterHandshake], a
 	ld [wPrinterStatusFlags], a
@@ -230,18 +231,18 @@ Printer_TransmissionLoop:
 	ret nz
 	ld a, [wPrinterStatusFlags]
 	and $f0
-	jr nz, .asm_e8921
+	jr nz, .enter_wait_loop
 	ld a, [wPrinterStatusFlags]
 	and $1
-	jr nz, .asm_e891d
+	jr nz, .cycle_back
 	call Printer_Next
 	ret
 
-.asm_e891d
+.cycle_back
 	call Printer_Back
 	ret
 
-.asm_e8921
+.enter_wait_loop
 	ld a, $12
 	ld [wPrinterSendState], a
 	ret
@@ -355,9 +356,9 @@ ComputePrinterChecksum:
 Printer_StageHeaderForSend:
 	ld a, $1
 	ld [wPrinterSendDataSource1], a
-	ld a, [wcae2]
+	ld a, [wPrinterMargins]
 	ld [wPrinterSendDataSource1 + 1], a
-	ld a, %11100100
+	ld a, %11100100 ; 3,2,1,0
 	ld [wPrinterSendDataSource1 + 2], a
 	ld a, [wPrinterSettingsTempCopy]
 	ld [wPrinterSendDataSource1 + 3], a

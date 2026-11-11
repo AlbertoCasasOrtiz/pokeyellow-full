@@ -82,7 +82,7 @@ LoadPikachuMovementCommandData:
 .no_param2
 	ld [wCurPikaMovementParam2], a
 	xor a
-	ld [wd451], a
+	ld [wCurPikaMovementUnusedByte], a
 	scf
 	ret
 
@@ -154,10 +154,10 @@ AnimatePikachuShadow:
 	ld hl, wPikachuMovementFlags
 	bit 6, [hl]
 	res 6, [hl]
-	ld hl, wd736
-	res 6, [hl]
+	ld hl, wMovementFlags
+	res BIT_LEDGE_OR_FISHING, [hl]
 	ret z
-	set 6, [hl]
+	set BIT_LEDGE_OR_FISHING, [hl]
 	call LoadPikachuShadowOAMData
 	ret
 
@@ -673,7 +673,7 @@ PikaMovementFunc2_TurnClockwise:
 	ld d, a
 	call CheckPikachuStepTimer2
 	jr nz, .skip
-	ld hl, Data_fd731
+	ld hl, PikaMovement_FacingDirections
 .loop
 	ld a, [hli]
 	cp d
@@ -690,7 +690,7 @@ PikaMovementFunc2_TurnCounterClockwise:
 	ld d, a
 	call CheckPikachuStepTimer2
 	jr nz, .skip
-	ld hl, Data_fd731End
+	ld hl, PikaMovement_FacingDirectionsEnd
 .loop
 	ld a, [hld]
 	cp d
@@ -702,13 +702,13 @@ PikaMovementFunc2_TurnCounterClockwise:
 	ld [wCurPikaMovementSpriteImageIdx], a
 	ret
 
-Data_fd731:
+PikaMovement_FacingDirections:
 	db SPRITE_FACING_DOWN
 	db SPRITE_FACING_LEFT
 	db SPRITE_FACING_UP
 	db SPRITE_FACING_RIGHT
 	db SPRITE_FACING_DOWN
-Data_fd731End:
+PikaMovement_FacingDirectionsEnd:
 
 PikaMovementFunc2_Timer:
 	push hl
@@ -867,7 +867,7 @@ LoadPikachuShadowOAMData:
 	push de
 	push hl
 
-	ld bc, wOAMBuffer + 4 * 36
+	ld bc, wShadowOAMSprite36
 	ld a, [wPikaSpriteY]
 	ld e, a
 	ld a, [wPikaSpriteX]
@@ -883,7 +883,7 @@ LoadPikachuShadowOAMData:
 .OAMData:
 	db 2
 	db $0c, $00, $ff, 0
-	db $0c, $08, $ff, 1 << OAM_X_FLIP
+	db $0c, $08, $ff, OAM_XFLIP
 
 .LoadOAMData:
 	ld a, e
@@ -930,7 +930,7 @@ LoadPikachuBallIconIntoVRAM:
 	lb bc, BANK(OverworldPikachuBallGFX), 1
 	jp CopyVideoDataDoubleAlternate
 
-Func_fd851:
+LoadOverworldPikachuBallGFX: ; unreferenced
 	ld hl, vNPCSprites + $c * $10
 	ld a, 3
 .loop
@@ -999,50 +999,50 @@ Pikachu_LoadCurrentMapViewUpdateSpritesAndDelay3:
 	call Delay3
 	ret
 
-Cosine_e: ; cosine?
+Cosine_e: 
 	ld a, e
 	add $10
-	jr asm_fd908
+	jr Wave_e
 
-Sine_e: ; sine?
+Sine_e:
 	ld a, e
-asm_fd908:
-	and $3f
-	cp $20
-	jr nc, .asm_fd913
-	call GetSine
+Wave_e:
+	and $3f ; wrap the 64-step full sine cycle
+	cp $20 ; the second half-cycle is negative
+	jr nc, .positive
+	call .GetSine
 	ld a, h
 	ret
 
-.asm_fd913
-	and $1f
-	call GetSine
+.positive
+	and $1f ; index the 32-entry half-wave table
+	call .GetSine
 	ld a, h
 	cpl
 	inc a
 	ret
 
-GetSine:
+.GetSine:
 	ld e, a
 	ld a, d
 	ld d, 0
-	ld hl, SineWave_3f
+	ld hl, .SineWave
 	add hl, de
 	add hl, de
 	ld e, [hl]
 	inc hl
 	ld d, [hl]
 	ld hl, 0
-.asm_fd92b
+.loop
 	srl a
-	jr nc, .asm_fd930
+	jr nc, .noAdd
 	add hl, de
-.asm_fd930
+.noAdd
 	sla e
 	rl d
 	and a
-	jr nz, .asm_fd92b
+	jr nz, .loop
 	ret
 
-SineWave_3f:
+.SineWave:
 	sine_table 32

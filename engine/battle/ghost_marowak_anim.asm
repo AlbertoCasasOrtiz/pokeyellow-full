@@ -2,7 +2,7 @@ MarowakAnim:
 ; animate the ghost being unveiled as a Marowak
 	ld a, $e4
 	ldh [rOBP1], a
-	call UpdateGBCPal_OBP1
+	call UpdateCGBPal_OBP1
 	call CopyMonPicFromBGToSpriteVRAM ; cover the BG ghost pic with a sprite ghost pic that looks the same
 ; now that the ghost pic is being displayed using sprites, clear the ghost pic from the BG tilemap
 	hlcoord 12, 0
@@ -17,7 +17,7 @@ MarowakAnim:
 	ld a, $1
 	ldh [hWhoseTurn], a
 	callfar ChangeMonPic
- ; alternate between black and light grey 8 times.
+ ; alternate between black and light gray 8 times.
  ; this makes the ghost's body appear to flash
 	ld d, $80
 	call FlashSprite8Times
@@ -28,7 +28,7 @@ MarowakAnim:
 	sla a
 	sla a
 	ldh [rOBP1], a
-	call UpdateGBCPal_OBP1
+	call UpdateCGBPal_OBP1
 	jr nz, .fadeOutGhostLoop
 	call ClearSprites
 	call CopyMonPicFromBGToSpriteVRAM ; copy Marowak pic from BG to sprite VRAM
@@ -42,7 +42,7 @@ MarowakAnim:
 	srl b
 	rra
 	ldh [rOBP1], a
-	call UpdateGBCPal_OBP1
+	call UpdateCGBPal_OBP1
 	ld a, b
 	and a
 	jr nz, .fadeInMarowakLoop
@@ -51,17 +51,17 @@ MarowakAnim:
 	call Delay3
 	jp ClearSprites
 
-; copies a mon pic's  from background VRAM to sprite VRAM and sets up OAM
+; copies a mon pic's from background VRAM to sprite VRAM and sets up OAM
 CopyMonPicFromBGToSpriteVRAM:
 	ld de, vFrontPic
 	ld hl, vSprites
-	ld bc, 7 * 7
+	ld bc, PIC_SIZE
 	call CopyVideoData
 	ld a, $10
 	ld [wBaseCoordY], a
 	ld a, $70
 	ld [wBaseCoordX], a
-	ld hl, wOAMBuffer
+	ld hl, wShadowOAM
 	lb bc, 6, 6
 	ld d, $8
 .oamLoop
@@ -77,7 +77,7 @@ CopyMonPicFromBGToSpriteVRAM:
 	ld [hli], a
 	ld a, d
 	ld [hli], a
-	ld a, OAM_OBP1 | OAM_HIGH_PALS
+	ld a, OAM_PAL1 | OAM_HIGH_PALS
 	ld [hli], a
 	inc d
 	dec c

@@ -11,18 +11,18 @@ LoadSpinnerArrowTiles::
 	ld a, [wCurMapTileset]
 	cp FACILITY
 	ld hl, FacilitySpinnerArrows
-	jr z, .asm_44ff6
+	jr z, .gotSpinnerArrows
 	ld hl, GymSpinnerArrows
-.asm_44ff6
+.gotSpinnerArrows
 	ld a, [wSimulatedJoypadStatesIndex]
-	bit 0, a
-	jr nz, .asm_45001
-	ld de, $18
+	bit 0, a ; even or odd?
+	jr nz, .alternateGraphics
+	ld de, 6 * 4
 	add hl, de
-.asm_45001
+.alternateGraphics
 	ld a, $4
 	ld bc, $0
-.asm_45006
+.loop
 	push af
 	push hl
 	push bc
@@ -46,7 +46,7 @@ LoadSpinnerArrowTiles::
 	pop hl
 	pop af
 	dec a
-	jr nz, .asm_45006
+	jr nz, .loop
 	ret
 
 INCLUDE "data/tilesets/spinner_tiles.asm"
@@ -55,10 +55,10 @@ SpinnerPlayerFacingDirections:
 ; This isn't the order of the facing directions.  Rather, it's a list of
 ; the facing directions that come next. For example, when the player is
 ; facing down (00), the next facing direction is left (08).
-	db $08 ; down -> left
-	db $0C ; up -> right
-	db $04 ; left -> up
-	db $00 ; right -> down
+	db SPRITE_FACING_LEFT  ; down -> left
+	db SPRITE_FACING_RIGHT ; up -> right
+	db SPRITE_FACING_UP    ; left -> up
+	db SPRITE_FACING_DOWN  ; right -> down
 
 ; these tiles are the animation for the tiles that push the player in dungeons like Rocket HQ
 SpinnerArrowAnimTiles:

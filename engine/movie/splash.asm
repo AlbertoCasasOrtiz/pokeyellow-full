@@ -3,26 +3,26 @@ LoadShootingStarGraphics:
 	ldh [rOBP0], a
 	ld a, $a4
 	ldh [rOBP1], a
-	call UpdateGBCPal_OBP0
-	call UpdateGBCPal_OBP1
-	ld de, AnimationTileset2 tile 3 ; star tile (top left quadrant)
+	call UpdateCGBPal_OBP0
+	call UpdateCGBPal_OBP1
+	ld de, MoveAnimationTiles1 tile 3 ; star tile (top left quadrant)
 	ld hl, vChars1 tile $20
-	lb bc, BANK(AnimationTileset2), $01
+	lb bc, BANK(MoveAnimationTiles1), 1
 	call CopyVideoData
-	ld de, AnimationTileset2 tile 19 ; star tile (bottom left quadrant)
+	ld de, MoveAnimationTiles1 tile 19 ; star tile (bottom left quadrant)
 	ld hl, vChars1 tile $21
-	lb bc, BANK(AnimationTileset2), 1
+	lb bc, BANK(MoveAnimationTiles1), 1
 	call CopyVideoData
 	ld de, FallingStar
 	ld hl, vChars1 tile $22
-	lb bc, BANK(FallingStar), (FallingStarEnd - FallingStar) / $10
+	lb bc, BANK(FallingStar), (FallingStarEnd - FallingStar) / TILE_SIZE
 	call CopyVideoData
 	ld hl, GameFreakLogoOAMData
-	ld de, wOAMBuffer + $60
+	ld de, wShadowOAMSprite24
 	ld bc, GameFreakLogoOAMDataEnd - GameFreakLogoOAMData
 	call CopyData
 	ld hl, GameFreakShootingStarOAMData
-	ld de, wOAMBuffer
+	ld de, wShadowOAM
 	ld bc, GameFreakShootingStarOAMDataEnd - GameFreakShootingStarOAMData
 	jp CopyData
 
@@ -32,7 +32,7 @@ AnimateShootingStar:
 	call PlaySound
 
 ; Move the big star down and left across the screen.
-	ld hl, wOAMBuffer
+	ld hl, wShadowOAM
 	lb bc, $a0, $4
 .bigStarLoop
 	push hl
@@ -62,11 +62,11 @@ AnimateShootingStar:
 	jr nz, .bigStarLoop
 
 ; Clear big star OAM.
-	ld hl, wOAMBuffer
+	ld hl, wShadowOAMSprite00YCoord
 	ld c, 4
-	ld de, 4
+	ld de, OBJ_SIZE
 .clearOAMLoop
-	ld [hl], 160
+	ld [hl], SCREEN_HEIGHT_PX + OAM_Y_OFS
 	add hl, de
 	dec c
 	jr nz, .clearOAMLoop
@@ -77,7 +77,7 @@ AnimateShootingStar:
 	ld hl, rOBP0
 	rrc [hl]
 	rrc [hl]
-	call UpdateGBCPal_OBP0
+	call UpdateCGBPal_OBP0
 	ld c, 10
 	call CheckForUserInterruption
 	ret c
@@ -86,7 +86,7 @@ AnimateShootingStar:
 
 ; Copy 24 instances of the small stars OAM data.
 ; Note that their coordinates put them off-screen.
-	ld de, wOAMBuffer
+	ld de, wShadowOAM
 	ld a, 24
 .initSmallStarsOAMLoop
 	push af
@@ -109,7 +109,7 @@ AnimateShootingStar:
 	ld d, a
 	push bc
 	push hl
-	ld hl, wOAMBuffer + $50
+	ld hl, wShadowOAMSprite20
 	ld c, 4
 .smallStarsInnerLoop ; introduce new wave of 4 small stars OAM entries
 	ld a, [de]
@@ -143,9 +143,9 @@ AnimateShootingStar:
 	push af
 
 ; shift the existing OAM entries down to make room for the next wave
-	ld hl, wOAMBuffer + $10
-	ld de, wOAMBuffer
-	ld bc, $50
+	ld hl, wShadowOAMSprite04
+	ld de, wShadowOAM
+	ld bc, OBJ_SIZE * 20
 	call CopyData
 
 	pop af
@@ -158,7 +158,7 @@ AnimateShootingStar:
 	ret
 
 SmallStarsOAM:
-	dbsprite  0,  0,  0,  0, $A2, OAM_BEHIND_BG | OAM_OBP1
+	dbsprite  0,  0,  0,  0, $A2, OAM_PRIO | OAM_PAL1
 SmallStarsOAMEnd:
 
 SmallStarsWaveCoordsPointerTable:
@@ -206,7 +206,7 @@ SmallStarsEmptyWave:
 MoveDownSmallStars:
 	ld b, 8
 .loop
-	ld hl, wOAMBuffer + $5c
+	ld hl, wShadowOAMSprite23
 	ld a, [wMoveDownSmallStarsOAMCount]
 	ld de, -4
 	ld c, a
@@ -220,7 +220,7 @@ MoveDownSmallStars:
 	ldh a, [rOBP1]
 	xor %10100000
 	ldh [rOBP1], a
-	call UpdateGBCPal_OBP1
+	call UpdateCGBPal_OBP1
 	ld c, 3
 	call CheckForUserInterruption
 	ret c
@@ -248,10 +248,10 @@ GameFreakLogoOAMData:
 GameFreakLogoOAMDataEnd:
 
 GameFreakShootingStarOAMData:
-	dbsprite 20,  0,  0,  0, $a0, OAM_OBP1 | OAM_HIGH_PALS
-	dbsprite 21,  0,  0,  0, $a0, OAM_OBP1 | OAM_HIGH_PALS | OAM_HFLIP
-	dbsprite 20,  1,  0,  0, $a1, OAM_OBP1 | OAM_HIGH_PALS
-	dbsprite 21,  1,  0,  0, $a1, OAM_OBP1 | OAM_HIGH_PALS | OAM_HFLIP
+	dbsprite 20,  0,  0,  0, $a0, OAM_PAL1 | OAM_HIGH_PALS
+	dbsprite 21,  0,  0,  0, $a0, OAM_PAL1 | OAM_HIGH_PALS | OAM_XFLIP
+	dbsprite 20,  1,  0,  0, $a1, OAM_PAL1 | OAM_HIGH_PALS
+	dbsprite 21,  1,  0,  0, $a1, OAM_PAL1 | OAM_HIGH_PALS | OAM_XFLIP
 GameFreakShootingStarOAMDataEnd:
 
 FallingStar:

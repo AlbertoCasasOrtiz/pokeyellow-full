@@ -1,5 +1,5 @@
 PokedexEntryPointers:
-	table_width 2, PokedexEntryPointers
+	table_width 2
 	dw RhydonDexEntry
 	dw KangaskhanDexEntry
 	dw NidoranMDexEntry
@@ -194,7 +194,7 @@ PokedexEntryPointers:
 
 ; string: species name
 ; height in feet, inches
-; weight in pounds
+; weight in tenths of a pound
 ; text entry
 
 BulbasaurDexEntry:

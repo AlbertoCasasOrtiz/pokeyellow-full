@@ -231,9 +231,9 @@ DEF BATTLE_SFX_START EQUS "SFX_PECK"
 	music_const SFX_BATTLE_34,          SFX_Battle_34
 	music_const SFX_BATTLE_35,          SFX_Battle_35
 	music_const SFX_BATTLE_36,          SFX_Battle_36
-	music_const SFX_SILPH_SCOPE,        SFX_Silph_Scope
-DEF BATTLE_SFX_END   EQUS "SFX_SILPH_SCOPE + 1"
-DEF MAX_SFX_ID_2 EQUS "SFX_SILPH_SCOPE"
+	music_const SFX_TRAINER_APPEARED,   SFX_Trainer_Appeared
+DEF BATTLE_SFX_END   EQUS "SFX_TRAINER_APPEARED + 1"
+DEF MAX_SFX_ID_2 EQUS "SFX_TRAINER_APPEARED"
 
 	; AUDIO_3
 	music_const SFX_INTRO_LUNGE,        SFX_Intro_Lunge
@@ -252,9 +252,12 @@ DEF MAX_SFX_ID_3 EQUS "SFX_SHOOTING_STAR"
 	music_const SFX_SURFING_JUMP,       SFX_Surfing_Jump
 	music_const SFX_SURFING_FLIP,       SFX_Surfing_Flip
 	music_const SFX_SURFING_CRASH,      SFX_Surfing_Crash
-	music_const SFX_UNKNOWN_802CC_4,    SFX_802cc_4
+	music_const SFX_SURFING_UNUSED,     SFX_Surfing_Unused
 	music_const SFX_SURFING_LAND,       SFX_Surfing_Land
 	music_const SFX_GET_ITEM2_4_2,      SFX_Get_Item2_4_2
 DEF MAX_SFX_ID_4 EQUS "SFX_GET_ITEM2_4_2 + 2"
 
 DEF SFX_STOP_ALL_MUSIC EQU $ff
+
+; Pikachu PCM cries (see audio/pikachu_cries_pointers.asm)
+DEF NUM_PIKA_CRIES EQU 42

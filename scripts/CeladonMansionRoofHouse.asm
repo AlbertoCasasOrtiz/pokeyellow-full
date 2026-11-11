@@ -3,20 +3,21 @@ CeladonMansionRoofHouse_Script:
 	ret
 
 CeladonMansionRoofHouse_TextPointers:
-	dw CeladonMansion5Text1
-	dw CeladonMansion5Text2
+	def_text_pointers
+	dw_const CeladonMansionRoofHouseHikerText,         TEXT_CELADONMANSION_ROOF_HOUSE_HIKER
+	dw_const CeladonMansionRoofHouseMewPokeballText, TEXT_CELADONMANSION_ROOF_HOUSE_MEW_POKEBALL
 
-CeladonMansion5Text1:
-	text_far _CeladonMansion5Text1
+CeladonMansionRoofHouseHikerText:
+	text_far _CeladonMansionRoofHouseHikerText
 	text_end
 
-CeladonMansion5Text2:
+CeladonMansionRoofHouseMewPokeballText:
 	text_asm
 	lb bc, MEW, 25
 	call GivePokemon
 	jr nc, .party_full
-	ld a, HS_CELADON_MANSION_MEW_GIFT
-	ld [wMissableObjectIndex], a
+	ld a, TOGGLE_CELADON_MANSION_MEW_GIFT
+	ld [wToggleableObjectIndex], a
 	predef HideObject
 .party_full
 	jp TextScriptEnd

@@ -5,7 +5,7 @@ EndOfBattle:
 ; link battle
 	ld a, [wEnemyMonPartyPos]
 	ld hl, wEnemyMon1Status
-	ld bc, wEnemyMon2 - wEnemyMon1
+	ld bc, PARTYMON_STRUCT_LENGTH
 	call AddNTimes
 	ld a, [wEnemyMonStatus]
 	ld [hl], a
@@ -50,7 +50,7 @@ EndOfBattle:
 .resetVariables
 	xor a
 	ld [wLowHealthAlarm], a ;disable low health alarm
-	ld [wChannelSoundIDs + Ch5], a
+	ld [wChannelSoundIDs + CHAN5], a
 	ld [wIsInBattle], a
 	ld [wBattleType], a
 	ld [wMoveMissed], a
@@ -64,14 +64,14 @@ EndOfBattle:
 	ld [hli], a
 	ld [hl], a
 	ld [wListScrollOffset], a
-	ld hl, wPlayerStatsToDouble
-	ld b, $18
+	ld hl, wBattleStatusData
+	ld b, wBattleStatusDataEnd - wBattleStatusData
 .loop
 	ld [hli], a
 	dec b
 	jr nz, .loop
-	ld hl, wd72c
-	set 0, [hl]
+	ld hl, wStatusFlags2
+	set BIT_WILD_ENCOUNTER_COOLDOWN, [hl]
 	call WaitForSoundToFinish
 	call GBPalWhiteOut
 	ld a, $ff

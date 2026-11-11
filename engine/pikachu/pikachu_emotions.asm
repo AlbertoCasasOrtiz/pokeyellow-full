@@ -1,19 +1,19 @@
-IsPlayerTalkingToPikachu::
-	ld a, [wd436]
+_IsPlayerTalkingToPikachu::
+	ld a, [wPlayerIsTalkingToPikachu]
 	and a
 	ret z
-	ldh a, [hSpriteIndexOrTextID]
-	cp $f
+	ldh a, [hSpriteIndex]
+	cp PIKACHU_SPRITE_INDEX
 	ret nz
 	call InitializePikachuTextID
 	xor a
-	ldh [hSpriteIndexOrTextID], a
-	ld [wd436], a
+	ldh [hSpriteIndex], a
+	ld [wPlayerIsTalkingToPikachu], a
 	ret
 
 InitializePikachuTextID::
 	ld a, TEXT_PIKACHU_ANIM ; display
-	ldh [hSpriteIndexOrTextID], a
+	ldh [hTextID], a
 	xor a
 	ld [wPlayerMovingDirection], a
 	ld a, $1
@@ -111,7 +111,7 @@ StarterPikachuEmotionCommand_emote:
 
 ShowPikachuEmoteBubble:
 	ld [wWhichEmotionBubble], a
-	ld a, $f ; Pikachu
+	ld a, PIKACHU_SPRITE_INDEX
 	ld [wEmotionBubbleSpriteIndex], a
 	predef EmotionBubble
 	ret
@@ -166,8 +166,8 @@ StarterPikachuEmotionCommand_subcmd:
 StarterPikachuEmotionCommand_nop2:
 IF DEF(_DEBUG)
 	push hl
-	ld hl, wd732
-	bit 1, [hl]
+	ld hl, wStatusFlags6
+	bit BIT_DEBUG_MODE, [hl]
 	pop hl
 	ret z
 	push de
@@ -206,15 +206,14 @@ StarterPikachuEmotionCommand_turnawayfromplayer:
 	ld [wSpritePikachuStateData1FacingDirection], a
 	ret
 
-DeletedFunction_fcffb:
-; Inexplicably empty.
+DebugCheckPikachuExpression:
 REPT 5
 	nop
 ENDR
 IF DEF(_DEBUG)
 	push hl
-	ld hl, wd732
-	bit 1, [hl]
+	ld hl, wStatusFlags6
+	bit BIT_DEBUG_MODE, [hl]
 	pop hl
 	ret z
 	push de
@@ -228,7 +227,7 @@ IF DEF(_DEBUG)
 	inc a
 	cp (PikachuEmotion33_id - PikachuEmotionTable) / 2
 	jr c, .valid
-	ldpikaemotion a, PikachuEmotion1
+	ldpikaemotion a, PikachuEmotionBlink
 .valid
 	ld [wExpressionNumber], a
 	ret
@@ -243,59 +242,59 @@ ENDC
 
 PlaySpecificPikachuEmotion:
 	ld a, e
-	jr load_expression
+	jr LoadPikachuExpression
 
 TalkToPikachu::
 	call MapSpecificPikachuExpression
-	jr c, load_expression
+	jr c, LoadPikachuExpression
 	call GetPikaPicAnimationScriptIndex
-	call DeletedFunction_fcffb
-load_expression:
+	call DebugCheckPikachuExpression
+LoadPikachuExpression:
 	ld [wExpressionNumber], a
 	ld hl, PikachuEmotionTable
 	call DoStarterPikachuEmotions
 	ret
 
 MACRO pikaemotion_def
-\1_id:
+\1_id::
 	dw \1
 ENDM
 
-PikachuEmotionTable:
+PikachuEmotionTable::
 	pikaemotion_def PikachuEmotion0
-	pikaemotion_def PikachuEmotion1
-	pikaemotion_def PikachuEmotion2
-	pikaemotion_def PikachuEmotion3
-	pikaemotion_def PikachuEmotion4
-	pikaemotion_def PikachuEmotion5
-	pikaemotion_def PikachuEmotion6
-	pikaemotion_def PikachuEmotion7
-	pikaemotion_def PikachuEmotion8
-	pikaemotion_def PikachuEmotion9
-	pikaemotion_def PikachuEmotion10
-	pikaemotion_def PikachuEmotion11
-	pikaemotion_def PikachuEmotion12
-	pikaemotion_def PikachuEmotion13
-	pikaemotion_def PikachuEmotion14
-	pikaemotion_def PikachuEmotion15
-	pikaemotion_def PikachuEmotion16
-	pikaemotion_def PikachuEmotion17
-	pikaemotion_def PikachuEmotion18
-	pikaemotion_def PikachuEmotion19
-	pikaemotion_def PikachuEmotion20
-	pikaemotion_def PikachuEmotion21 ; used a fishing rod
-	pikaemotion_def PikachuEmotion22
-	pikaemotion_def PikachuEmotion23
-	pikaemotion_def PikachuEmotion24
-	pikaemotion_def PikachuEmotion25
-	pikaemotion_def PikachuEmotion26 ; wake up pikachu in pewter pokemon center
-	pikaemotion_def PikachuEmotion27
-	pikaemotion_def PikachuEmotion28
-	pikaemotion_def PikachuEmotion29
-	pikaemotion_def PikachuEmotion30
-	pikaemotion_def PikachuEmotion31
-	pikaemotion_def PikachuEmotion32
-	pikaemotion_def PikachuEmotion33
+	pikaemotion_def PikachuEmotionBlink
+	pikaemotion_def PikachuEmotionExcited
+	pikaemotion_def PikachuEmotionEarTwitch
+	pikaemotion_def PikachuEmotionHappy
+	pikaemotion_def PikachuEmotionSad
+	pikaemotion_def PikachuEmotionSideBlink
+	pikaemotion_def PikachuEmotionJump
+	pikaemotion_def PikachuEmotionSmile
+	pikaemotion_def PikachuEmotionBackTurn
+	pikaemotion_def PikachuEmotionJoy
+	pikaemotion_def PikachuEmotionSleep
+	pikaemotion_def PikachuEmotionBored
+	pikaemotion_def PikachuEmotionSide
+	pikaemotion_def PikachuEmotionAngryBolt
+	pikaemotion_def PikachuEmotionFistPump
+	pikaemotion_def PikachuEmotionHeart
+	pikaemotion_def PikachuEmotionMad
+	pikaemotion_def PikachuEmotionWink
+	pikaemotion_def PikachuEmotion2Hearts
+	pikaemotion_def PikachuEmotionLove
+	pikaemotion_def PikachuEmotionBucket ; used a fishing rod
+	pikaemotion_def PikachuEmotionScared
+	pikaemotion_def PikachuEmotionConfused
+	pikaemotion_def PikachuEmotionHeadShake
+	pikaemotion_def PikachuEmotionLightning
+	pikaemotion_def PikachuEmotionWakeUp ; wake up pikachu in pewter pokemon center
+	pikaemotion_def PikachuEmotionSurprised
+	pikaemotion_def PikachuEmotionCry
+	pikaemotion_def PikachuEmotionJoy2
+	pikaemotion_def PikachuEmotionLove2
+	pikaemotion_def PikachuEmotionConfused2
+	pikaemotion_def PikachuEmotionConfused3
+	pikaemotion_def PikachuEmotion33 ; used as table pointer
 
 PikachuEmotion33:
 	db $ff
@@ -304,12 +303,12 @@ MapSpecificPikachuExpression:
 	ld a, [wCurMap]
 	cp POKEMON_FAN_CLUB
 	jr nz, .notFanClub
-	ld hl, wd492
-	bit 7, [hl]
-	ldpikaemotion a, PikachuEmotion29
+	ld hl, wPikachuMapScriptFlags
+	bit BIT_PIKACHU_MAP_SCRIPT_ACTIVE, [hl]
+	ldpikaemotion a, PikachuEmotionJoy2
 	jr z, .play_emotion
 	call CheckPikachuFollowingPlayer
-	ldpikaemotion a, PikachuEmotion30
+	ldpikaemotion a, PikachuEmotionLove2
 	jr nz, .play_emotion
 	jr .check_pikachu_status
 
@@ -318,12 +317,12 @@ MapSpecificPikachuExpression:
 	cp PEWTER_POKECENTER
 	jr nz, .notPewterPokecenter
 	call CheckPikachuFollowingPlayer
-	ldpikaemotion a, PikachuEmotion26
+	ldpikaemotion a, PikachuEmotionWakeUp
 	jr nz, .play_emotion
 	jr .check_pikachu_status
 
 .notPewterPokecenter
-	callfar Func_f24ae
+	callfar BillsHouse_CheckPikachuEmotion
 	ld a, e
 	cp $ff
 	jr nz, .play_emotion
@@ -331,19 +330,19 @@ MapSpecificPikachuExpression:
 
 .check_pikachu_status
 	call IsPlayerPikachuAsleepInParty
-	ldpikaemotion a, PikachuEmotion11
+	ldpikaemotion a, PikachuEmotionSleep
 	jr c, .play_emotion
-	callfar CheckPikachuFaintedOrStatused ; same bank
-	ldpikaemotion a, PikachuEmotion28
+	callfar CheckPikachuStatusCondition ; same bank
+	ldpikaemotion a, PikachuEmotionCry
 	jr c, .play_emotion
 	ld a, [wCurMap]
 	cp POKEMON_TOWER_1F
 	jr c, .notInLavenderTower
 	cp POKEMON_TOWER_7F + 1
-	ldpikaemotion a, PikachuEmotion22
+	ldpikaemotion a, PikachuEmotionScared
 	jr c, .play_emotion
 .notInLavenderTower
-	ld a, [wd49c]
+	ld a, [wPikachuEmotionModifier]
 	and a
 	jr z, .mood_based_emotion
 	dec a
@@ -363,11 +362,11 @@ MapSpecificPikachuExpression:
 	ret
 
 .Emotions:
-	dpikaemotion PikachuEmotion18
-	dpikaemotion PikachuEmotion21
-	dpikaemotion PikachuEmotion23
-	dpikaemotion PikachuEmotion24
-	dpikaemotion PikachuEmotion25
+	dpikaemotion PikachuEmotionWink
+	dpikaemotion PikachuEmotionBucket
+	dpikaemotion PikachuEmotionConfused
+	dpikaemotion PikachuEmotionHeadShake
+	dpikaemotion PikachuEmotionLightning
 
 IsPlayerPikachuAsleepInParty:
 	xor a
@@ -381,9 +380,9 @@ IsPlayerPikachuAsleepInParty:
 	ld a, [hl]
 	cp $ff
 	jr z, .done
-	cp STARTER_PIKACHU
+	cp STARTER
 	jr nz, .curMonNotStarterPikachu
-	callfar IsThisPartymonStarterPikachu
+	callfar IsThisPartyMonStarterPikachu
 	jr nc, .curMonNotStarterPikachu
 	ld a, [wWhichPokemon]
 	ld hl, wPartyMon1Status

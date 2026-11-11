@@ -29,6 +29,12 @@ MACRO object_event
 	ELSE
 		db \6
 	ENDC
+	; items and trainers don't use a typical text id
+	IF _NARG > 6
+		REDEF _OBJECT_EVENT_{d:{_NUM_OBJECT_EVENTS}}_TEXT_ID EQUS "0"
+	ELSE
+		REDEF _OBJECT_EVENT_{d:{_NUM_OBJECT_EVENTS}}_TEXT_ID EQUS "\6"
+	ENDC
 	DEF {_NUM_OBJECT_EVENTS} += 1
 ENDM
 
@@ -60,12 +66,28 @@ ENDM
 ;\3 sign id
 MACRO bg_event
 	db \2, \1, \3
+	REDEF _BG_EVENT_{d:{_NUM_BG_EVENTS}}_TEXT_ID EQUS "\3"
 	DEF {_NUM_BG_EVENTS} += 1
 ENDM
 
 ;\1 source map
 MACRO def_warps_to
-	FOR n, _NUM_WARP_EVENTS
+	ASSERT {_NUM_WARP_EVENTS} <= MAX_WARP_EVENTS, \
+		"Too many warp_events (above {d:MAX_WARP_EVENTS})!"
+	ASSERT {_NUM_BG_EVENTS} <= MAX_BG_EVENTS, \
+		"Too many bg_events (above {d:MAX_BG_EVENTS})!"
+	ASSERT {_NUM_OBJECT_EVENTS} <= MAX_OBJECT_EVENTS, \
+		"Too many object_events (above {d:MAX_OBJECT_EVENTS})!"
+	; text ID values are significant (see DisplayTextID in home/text_scripts.asm)
+	FOR n, {_NUM_BG_EVENTS}
+		ASSERT {_BG_EVENT_{d:n}_TEXT_ID} > {_NUM_OBJECT_EVENTS}, \
+			"A bg_event has text ID {_BG_EVENT_{d:n}_TEXT_ID} expected for an object_event ({d:{_NUM_OBJECT_EVENTS}} or below)"
+	ENDR
+	FOR n, {_NUM_OBJECT_EVENTS}
+		ASSERT {_OBJECT_EVENT_{d:n}_TEXT_ID} <= {_NUM_OBJECT_EVENTS}, \
+			"An object_event has text ID {_OBJECT_EVENT_{d:n}_TEXT_ID} expected for a bg_event (above {d:{_NUM_OBJECT_EVENTS}})"
+	ENDR
+	FOR n, {_NUM_WARP_EVENTS}
 		warp_to _WARP_{d:n}_X, _WARP_{d:n}_Y, \1_WIDTH
 	ENDR
 ENDM
@@ -90,8 +112,8 @@ ENDM
 ;\1 event flag
 ;\2 view range
 ;\3 TextBeforeBattle
-;\4 TextAfterBattle
-;\5 TextEndBattle
+;\4 TextEndBattle
+;\5 TextAfterBattle
 MACRO trainer
 	DEF _ev_bit = \1 % 8
 	DEF _cur_bit = CURRENT_TRAINER_BIT % 8
@@ -116,8 +138,8 @@ ENDM
 ;\1 map name
 ;\2 map id
 ;\3 tileset
-;\4 connections: combo of NORTH, SOUTH, WEST, and/or EAST, or 0 for none
 MACRO map_header
+	REDEF CURRENT_MAP_ID EQUS "\2"
 	DEF CURRENT_MAP_WIDTH = \2_WIDTH
 	DEF CURRENT_MAP_HEIGHT = \2_HEIGHT
 	DEF CURRENT_MAP_OBJECT EQUS "\1_Object"
@@ -127,7 +149,10 @@ MACRO map_header
 	dw \1_Blocks
 	dw \1_TextPointers
 	dw \1_Script
-	db \4
+	db MAP_CONNECTIONS_\2
+	; Define `MAP_CONNECTIONS_\2` after `db`ing it so that the `db`ed value
+	; gets updated when subsequent `connection`s modify `MAP_CONNECTIONS_\2`.
+	DEF MAP_CONNECTIONS_\2 = 0
 ENDM
 
 ; Comes after map_header and connection macros
@@ -152,7 +177,11 @@ MACRO connection
 		DEF _tgt = 0
 	ENDC
 
-	IF !STRCMP("\1", "north")
+	IF "\1" === "north"
+		IF MAP_CONNECTIONS_{CURRENT_MAP_ID} & (NORTH | SOUTH | WEST | EAST)
+			fail "Invalid order for 'connection' (must be north, south, west, east)"
+		ENDC
+		DEF MAP_CONNECTIONS_{CURRENT_MAP_ID} |= NORTH
 		DEF _blk = \3_WIDTH * (\3_HEIGHT - 3) + _src
 		DEF _map = _tgt
 		DEF _win = (\3_WIDTH + 6) * \3_HEIGHT + 1
@@ -163,7 +192,11 @@ MACRO connection
 			DEF _len = \3_WIDTH
 		ENDC
 
-	ELIF !STRCMP("\1", "south")
+	ELIF "\1" === "south"
+		IF MAP_CONNECTIONS_{CURRENT_MAP_ID} & (SOUTH | WEST | EAST)
+			fail "Invalid order for 'connection' (must be north, south, west, east)"
+		ENDC
+		DEF MAP_CONNECTIONS_{CURRENT_MAP_ID} |= SOUTH
 		DEF _blk = _src
 		DEF _map = (CURRENT_MAP_WIDTH + 6) * (CURRENT_MAP_HEIGHT + 3) + _tgt
 		DEF _win = \3_WIDTH + 7
@@ -174,7 +207,11 @@ MACRO connection
 			DEF _len = \3_WIDTH
 		ENDC
 
-	ELIF !STRCMP("\1", "west")
+	ELIF "\1" === "west"
+		IF MAP_CONNECTIONS_{CURRENT_MAP_ID} & (WEST | EAST)
+			fail "Invalid order for 'connection' (must be north, south, west, east)"
+		ENDC
+		DEF MAP_CONNECTIONS_{CURRENT_MAP_ID} |= WEST
 		DEF _blk = (\3_WIDTH * _src) + \3_WIDTH - 3
 		DEF _map = (CURRENT_MAP_WIDTH + 6) * _tgt
 		DEF _win = (\3_WIDTH + 6) * 2 - 6
@@ -185,7 +222,11 @@ MACRO connection
 			DEF _len = \3_HEIGHT
 		ENDC
 
-	ELIF !STRCMP("\1", "east")
+	ELIF "\1" === "east"
+		IF MAP_CONNECTIONS_{CURRENT_MAP_ID} & EAST
+			fail "Invalid order for 'connection' (must be north, south, west, east)"
+		ENDC
+		DEF MAP_CONNECTIONS_{CURRENT_MAP_ID} |= EAST
 		DEF _blk = (\3_WIDTH * _src)
 		DEF _map = (CURRENT_MAP_WIDTH + 6) * _tgt + CURRENT_MAP_WIDTH + 3
 		DEF _win = \3_WIDTH + 7
@@ -207,4 +248,16 @@ MACRO connection
 	db \3_WIDTH
 	db _y, _x
 	dw wOverworldMap + _win
+ENDM
+
+MACRO def_script_pointers
+	const_def
+ENDM
+
+MACRO def_text_pointers
+	const_def 1
+ENDM
+
+MACRO object_const_def
+	const_def 1
 ENDM

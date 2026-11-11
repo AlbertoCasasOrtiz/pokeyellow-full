@@ -578,7 +578,7 @@ AISwitchIfEnoughMons:
 	inc d
 .Fainted
 	push bc
-	ld bc, wEnemyMon2 - wEnemyMon1
+	ld bc, PARTYMON_STRUCT_LENGTH
 	add hl, bc
 	pop bc
 	dec c
@@ -592,16 +592,16 @@ AISwitchIfEnoughMons:
 
 SwitchEnemyMon:
 
-; prepare to withdraw the active monster: copy hp, number, and status to roster
+; prepare to withdraw the active monster: copy HP, party pos, and status to roster
 
 	ld a, [wEnemyMonPartyPos]
 	ld hl, wEnemyMon1HP
-	ld bc, wEnemyMon2 - wEnemyMon1
+	ld bc, PARTYMON_STRUCT_LENGTH
 	call AddNTimes
 	ld d, h
 	ld e, l
 	ld hl, wEnemyMonHP
-	ld bc, 4
+	ld bc, MON_STATUS + 1 - MON_HP ; also copies party pos in-between HP and status
 	call CopyData
 
 	ld hl, AIBattleWithdrawText
@@ -635,33 +635,33 @@ AICureStatus:
 ; cures the status of enemy's active pokemon
 	ld a, [wEnemyMonPartyPos]
 	ld hl, wEnemyMon1Status
-	ld bc, wEnemyMon2 - wEnemyMon1
+	ld bc, PARTYMON_STRUCT_LENGTH
 	call AddNTimes
 	xor a
 	ld [hl], a ; clear status in enemy team roster
 	ld [wEnemyMonStatus], a ; clear status of active enemy
 	ld hl, wEnemyBattleStatus3
-	res 0, [hl]
+	res BADLY_POISONED, [hl]
 	ret
 
-AIUseXAccuracy: ; unused
+AIUseXAccuracy: ; unreferenced
 	call AIPlayRestoringSFX
 	ld hl, wEnemyBattleStatus2
-	set 0, [hl]
+	set USING_X_ACCURACY, [hl]
 	ld a, X_ACCURACY
 	jp AIPrintItemUse
 
 AIUseGuardSpec:
 	call AIPlayRestoringSFX
 	ld hl, wEnemyBattleStatus2
-	set 1, [hl]
+	set PROTECTED_BY_MIST, [hl]
 	ld a, GUARD_SPEC
 	jp AIPrintItemUse
 
-AIUseDireHit: ; unused
+AIUseDireHit: ; unreferenced
 	call AIPlayRestoringSFX
 	ld hl, wEnemyBattleStatus2
-	set 2, [hl]
+	set GETTING_PUMPED, [hl]
 	ld a, DIRE_HIT
 	jp AIPrintItemUse
 
@@ -692,22 +692,22 @@ AICheckIfHPBelowFraction:
 	ret
 
 AIUseXAttack:
-	ld b, $A
+	ld b, ATTACK_UP1_EFFECT
 	ld a, X_ATTACK
 	jr AIIncreaseStat
 
 AIUseXDefend:
-	ld b, $B
+	ld b, DEFENSE_UP1_EFFECT
 	ld a, X_DEFEND
 	jr AIIncreaseStat
 
 AIUseXSpeed:
-	ld b, $C
+	ld b, SPEED_UP1_EFFECT
 	ld a, X_SPEED
 	jr AIIncreaseStat
 
 AIUseXSpecial:
-	ld b, $D
+	ld b, SPECIAL_UP1_EFFECT
 	ld a, X_SPECIAL
 	; fallthrough
 
@@ -722,7 +722,7 @@ AIIncreaseStat:
 	ld a, [hl]
 	push af
 	push hl
-	ld a, ANIM_AF
+	ld a, XSTATITEM_DUPLICATE_ANIM
 	ld [hli], a
 	ld [hl], b
 	callfar StatModifierUpEffect
@@ -741,7 +741,7 @@ AIPrintItemUse:
 AIPrintItemUse_:
 ; print "x used [wAIItem] on z!"
 	ld a, [wAIItem]
-	ld [wd11e], a
+	ld [wNamedObjectIndex], a
 	call GetItemName
 	ld hl, AIBattleUseItemText
 	jp PrintText

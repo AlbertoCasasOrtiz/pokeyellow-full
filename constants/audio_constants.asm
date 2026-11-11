@@ -19,35 +19,17 @@ DEF NUM_NOTES EQU const_value
 ; Audio[1|2|3]_HWChannelBaseAddresses, Audio[1|2|3]_HWChannelDisableMasks,
 ; and Audio[1|2|3]_HWChannelEnableMasks indexes (see audio/engine_[1|2|3].asm)
 	const_def
-	const Ch1 ; 0
-	const Ch2 ; 1
-	const Ch3 ; 2
-	const Ch4 ; 3
+	const CHAN1 ; 0
+	const CHAN2 ; 1
+	const CHAN3 ; 2
+	const CHAN4 ; 3
 DEF NUM_MUSIC_CHANS EQU const_value
-	const Ch5 ; 4
-	const Ch6 ; 5
-	const Ch7 ; 6
-	const Ch8 ; 7
+	const CHAN5 ; 4
+	const CHAN6 ; 5
+	const CHAN7 ; 6
+	const CHAN8 ; 7
 DEF NUM_NOISE_CHANS EQU const_value - NUM_MUSIC_CHANS
 DEF NUM_CHANNELS EQU const_value
-
-; HW sound channel register base addresses
-DEF HW_CH1_BASE EQU LOW(rNR10)
-DEF HW_CH2_BASE EQU LOW(rNR21) - 1
-DEF HW_CH3_BASE EQU LOW(rNR30)
-DEF HW_CH4_BASE EQU LOW(rNR41) - 1
-
-; HW sound channel enable bit masks
-DEF HW_CH1_ENABLE_MASK EQU %00010001
-DEF HW_CH2_ENABLE_MASK EQU %00100010
-DEF HW_CH3_ENABLE_MASK EQU %01000100
-DEF HW_CH4_ENABLE_MASK EQU %10001000
-
-; HW sound channel disable bit masks
-DEF HW_CH1_DISABLE_MASK EQU (~HW_CH1_ENABLE_MASK & $ff)
-DEF HW_CH2_DISABLE_MASK EQU (~HW_CH2_ENABLE_MASK & $ff)
-DEF HW_CH3_DISABLE_MASK EQU (~HW_CH3_ENABLE_MASK & $ff)
-DEF HW_CH4_DISABLE_MASK EQU (~HW_CH4_ENABLE_MASK & $ff)
 
 	const_def 1
 	const REG_DUTY_SOUND_LEN  ; 1
@@ -66,3 +48,11 @@ DEF HW_CH4_DISABLE_MASK EQU (~HW_CH4_ENABLE_MASK & $ff)
 
 ; wChannelFlags2 constant (only has one flag)
 DEF BIT_EXECUTE_MUSIC EQU 0 ; if in execute music
+
+; wMuteAudioAndPauseMusic
+DEF BIT_MUTE_AUDIO EQU 7
+
+; wLowHealthAlarm
+DEF BIT_LOW_HEALTH_ALARM EQU 7
+DEF LOW_HEALTH_TIMER_MASK EQU %01111111
+DEF DISABLE_LOW_HEALTH_ALARM EQU $ff

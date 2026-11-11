@@ -1,10 +1,3 @@
-	const_def -1
-	const MOVE_NIDORINO_RIGHT
-	const MOVE_GENGAR_RIGHT
-	const MOVE_GENGAR_LEFT
-
-DEF ANIMATION_END EQU 80
-
 PlayIntro:
 	xor a
 	ldh [hJoyHeld], a
@@ -19,8 +12,8 @@ PlayIntro:
 	call DelayFrame
 	ret
 
-InitIntroNidorinoOAM:
-	ld hl, wOAMBuffer
+InitIntroNidorinoOAM: ; unreferenced
+	ld hl, wShadowOAM
 	ld d, 0
 .loop
 	push bc
@@ -35,7 +28,7 @@ InitIntroNidorinoOAM:
 	ld [hli], a ; X
 	ld a, d
 	ld [hli], a ; tile
-	ld a, OAM_BEHIND_BG
+	ld a, OAM_PRIO
 	ld [hli], a ; attributes
 	inc d
 	dec c
@@ -50,7 +43,7 @@ InitIntroNidorinoOAM:
 
 IntroClearScreen:
 	ld hl, vBGMap1
-	ld bc, BG_MAP_WIDTH * SCREEN_HEIGHT
+	ld bc, TILEMAP_WIDTH * SCREEN_HEIGHT
 	jr IntroClearCommon
 
 IntroClearMiddleOfScreen:
@@ -85,7 +78,7 @@ PlayShootingStar:
 	farcall LoadCopyrightAndTextBoxTiles
 	ldpal a, SHADE_BLACK, SHADE_DARK, SHADE_LIGHT, SHADE_WHITE
 	ldh [rBGP], a
-	call UpdateGBCPal_BGP
+	call UpdateCGBPal_BGP
 	ld c, 180
 	call DelayFrames
 	call ClearScreen
@@ -116,12 +109,13 @@ PlayShootingStar:
 
 	call EnableLCD
 	ld hl, rLCDC
-	res 5, [hl]
-	set 3, [hl]
+	res B_LCDC_WINDOW, [hl]
+	set B_LCDC_BG_MAP, [hl]
 	ld c, 64
 	call DelayFrames
 	farcall AnimateShootingStar
 	push af
+	; A `call LoadPresentsGraphic` here was removed in localization
 	pop af
 	jr c, .next ; skip the delay if the user interrupted the animation
 	ld c, 40
@@ -141,17 +135,21 @@ IntroDrawBlackBars:
 	ld c, SCREEN_WIDTH * 4
 	call IntroPlaceBlackTiles
 	ld hl, vBGMap1
-	ld c,  BG_MAP_WIDTH * 4
+	ld c,  TILEMAP_WIDTH * 4
 	call IntroPlaceBlackTiles
 	hlbgcoord 0, 14, vBGMap1
-	ld c,  BG_MAP_WIDTH * 4
+	ld c,  TILEMAP_WIDTH * 4
 	jp IntroPlaceBlackTiles
 
-EmptyFunc2:
+LoadPresentsGraphic: ; unreferenced
+	; This routine loaded the "PRESENTS" text graphic (tiles
+	; $67, $68, $69, $6A, $6B, and $6C from gamefreak_presents.2bpp)
+	; at coordinates (11, 7) in the Japanese versions.
+	; It was dummied out in the English localization.
 	ret
 
 GameFreakIntro:
 	INCBIN "gfx/splash/gamefreak_presents.2bpp"
 	INCBIN "gfx/splash/gamefreak_logo.2bpp"
-	ds 16, $00 ; blank tile
+	ds TILE_SIZE, $00 ; blank tile
 GameFreakIntroEnd:

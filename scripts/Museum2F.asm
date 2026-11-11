@@ -3,69 +3,70 @@ Museum2F_Script:
 	ret
 
 Museum2F_TextPointers:
-	dw Museum2FText1
-	dw Museum2FText2
-	dw Museum2FText3
-	dw Museum2FText4
-	dw Museum2FText5
-	dw Museum2FText6
-	dw Museum2FText7
+	def_text_pointers
+	dw_const Museum2FYoungsterText,        TEXT_MUSEUM2F_YOUNGSTER
+	dw_const Museum2FGrampsText,           TEXT_MUSEUM2F_GRAMPS
+	dw_const Museum2FScientistText,        TEXT_MUSEUM2F_SCIENTIST
+	dw_const Museum2FBrunetteGirlText,     TEXT_MUSEUM2F_BRUNETTE_GIRL
+	dw_const Museum2FHikerText,            TEXT_MUSEUM2F_HIKER
+	dw_const Museum2FSpaceShuttleSignText, TEXT_MUSEUM2F_SPACE_SHUTTLE_SIGN
+	dw_const Museum2FMoonStoneSignText,    TEXT_MUSEUM2F_MOON_STONE_SIGN
 
-Museum2FText1:
-	text_far _Museum2FText1
+Museum2FYoungsterText:
+	text_far _Museum2FYoungsterText
 	text_end
 
-Museum2FText2:
-	text_far _Museum2FText2
+Museum2FGrampsText:
+	text_far _Museum2FGrampsText
 	text_end
 
-Museum2FText3:
-	text_far _Museum2FText3
+Museum2FScientistText:
+	text_far _Museum2FScientistText
 	text_end
 
-Museum2FText4:
-	text_far _Museum2FText4
+Museum2FBrunetteGirlText:
+	text_far _Museum2FBrunetteGirlText
 	text_end
 
-Museum2FText5:
+Museum2FHikerText:
 	text_asm
-	ld a, [wd472]
-	bit 7, a
-	jr nz, .asm_5c1f6
-	ld hl, Museum2FText_5c20e
+	ld a, [wPikachuSpawnStateFlags]
+	bit BIT_PIKACHU_SPAWN_STARTER, a
+	jr nz, .pikachuIsFollowing
+	ld hl, Museum2FHikerText1
 	call PrintText
-	jr .asm_5c20b
+	jr .done
 
-.asm_5c1f6
+.pikachuIsFollowing
 	ld a, [wPikachuHappiness]
 	cp 101
-	jr c, .asm_5c205
-	ld hl, Museum2FText_5c218
+	jr c, .pikachuIsUnhappy
+	ld hl, Museum2FHikerText3
 	call PrintText
-	jr .asm_5c20b
+	jr .done
 
-.asm_5c205
-	ld hl, Museum2FText_5c213
+.pikachuIsUnhappy
+	ld hl, Museum2FHikerText2
 	call PrintText
-.asm_5c20b
+.done
 	jp TextScriptEnd
 
-Museum2FText_5c20e:
-	text_far _Museum2FText5
+Museum2FHikerText1:
+	text_far _Museum2FHikerText1
 	text_end
 
-Museum2FText_5c213:
-	text_far _Museum2FPikachuText1
+Museum2FHikerText2:
+	text_far _Museum2FHikerText2
 	text_end
 
-Museum2FText_5c218:
-	text_far _Museum2FPikachuText2
+Museum2FHikerText3:
+	text_far _Museum2FHikerText3
 	text_end
 
-Museum2FText6:
-	text_far _Museum2FText6
+Museum2FSpaceShuttleSignText:
+	text_far _Museum2FSpaceShuttleSignText
 	text_end
 
-Museum2FText7:
-	text_far _Museum2FText7
+Museum2FMoonStoneSignText:
+	text_far _Museum2FMoonStoneSignText
 	text_end

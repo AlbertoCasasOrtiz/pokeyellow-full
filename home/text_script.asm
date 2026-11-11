@@ -1,28 +1,29 @@
-UnknownText_2812:: ; unreferenced
+PokemonText:: ; unreferenced
 	text_far _PokemonText
 	text_end
 
 ; this function is used to display sign messages, sprite dialog, etc.
-; INPUT: [hSpriteIndexOrTextID] = sprite ID or text ID
+; INPUT: [hSpriteIndex] = sprite ID or [hTextID] = text ID
 DisplayTextID::
+	ASSERT hSpriteIndex == hTextID ; these are at the same memory location
 	ldh a, [hLoadedROMBank]
 	push af
 	farcall DisplayTextIDInit ; initialization
 	ld hl, wTextPredefFlag
-	bit 0, [hl]
-	res 0, [hl]
+	bit BIT_TEXT_PREDEF, [hl]
+	res BIT_TEXT_PREDEF, [hl]
 	jr nz, .skipSwitchToMapBank
 	ld a, [wCurMap]
 	call SwitchToMapRomBank
 .skipSwitchToMapBank
 	ld a, 30 ; half a second
 	ldh [hFrameCounter], a ; used as joypad poll timer
-	ld hl, wMapTextPtr
+	ld hl, wCurMapTextPtr
 	ld a, [hli]
 	ld h, [hl]
 	ld l, a ; hl = map text pointer
 	ld d, $00
-	ldh a, [hSpriteIndexOrTextID] ; text ID
+	ldh a, [hTextID]
 	ld [wSpriteIndex], a
 
 	dict TEXT_START_MENU,       DisplayStartMenu
@@ -34,7 +35,7 @@ DisplayTextID::
 
 	ld a, [wNumSprites]
 	ld e, a
-	ldh a, [hSpriteIndexOrTextID] ; sprite ID
+	ldh a, [hSpriteIndex] ; sprite ID
 	cp e
 	jr z, .spriteHandling
 	jr nc, .skipSpriteHandling
@@ -42,7 +43,7 @@ DisplayTextID::
 ; get the text ID of the sprite
 	push hl
 	ld hl, wMapSpriteData ; NPC text entries
-	ldh a, [hSpriteIndexOrTextID]
+	ldh a, [hSpriteIndex]
 	dec a
 	add a
 	ld e, a
@@ -82,7 +83,7 @@ ENDM
 	dict  TX_SCRIPT_PRIZE_VENDOR,            TextScript_GameCornerPrizeMenu
 	dict2 TX_SCRIPT_CABLE_CLUB_RECEPTIONIST, callfar CableClubNPC
 
-	call PrintText_NoCreatingTextBox ; display the text
+	call PrintText_NoCreatingTextBox
 	ld a, [wDoNotWaitForButtonPressAfterDisplayingText]
 	and a
 	jr nz, HoldTextDisplayOpen
@@ -91,13 +92,13 @@ AfterDisplayingTextID::
 	ld a, [wEnteringCableClub]
 	and a
 	jr nz, HoldTextDisplayOpen
-	call WaitForTextScrollButtonPress ; wait for a button press after displaying all the text
+	call WaitForTextScrollButtonPress
 
 ; loop to hold the dialogue box open as long as the player keeps holding down the A button
 HoldTextDisplayOpen::
 	call Joypad
 	ldh a, [hJoyHeld]
-	bit BIT_A_BUTTON, a
+	bit B_PAD_A, a
 	jr nz, HoldTextDisplayOpen
 
 CloseTextDisplay::
@@ -111,8 +112,8 @@ CloseTextDisplay::
 	ldh [hAutoBGTransferEnabled], a ; disable continuous WRAM to VRAM transfer each V-blank
 ; loop to make sprites face the directions they originally faced before the dialogue
 	ld hl, wSprite01StateData2OrigFacingDirection
-	ld c, $0f
-	ld de, $10
+	ld c, NUM_SPRITESTATEDATA_STRUCTS - 1
+	ld de, SPRITESTATEDATA1_LENGTH
 .restoreSpriteFacingDirectionLoop
 	ld a, [hl] ; x#SPRITESTATEDATA2_ORIGFACINGDIRECTION
 	dec h
@@ -123,9 +124,9 @@ CloseTextDisplay::
 	jr nz, .restoreSpriteFacingDirectionLoop
 	call InitMapSprites ; reload sprite tile pattern data (since it was partially overwritten by text tile patterns)
 	ld hl, wFontLoaded
-	res 0, [hl]
-	ld a, [wd732]
-	bit 3, a ; used fly warp
+	res BIT_FONT_LOADED, [hl]
+	ld a, [wStatusFlags6]
+	bit BIT_FLY_WARP, a
 	call z, LoadPlayerSpriteGraphics
 	call LoadCurrentMapView
 	pop af
@@ -191,9 +192,9 @@ PokemonFaintedText::
 DisplayPlayerBlackedOutText::
 	ld hl, PlayerBlackedOutText
 	call PrintText
-	ld a, [wd732]
-	res 5, a ; reset forced to use bike bit
-	ld [wd732], a
+	ld a, [wStatusFlags6]
+	res BIT_ALWAYS_ON_BIKE, a
+	ld [wStatusFlags6], a
 	CheckEvent EVENT_IN_SAFARI_ZONE
 	jr z, .didnotblackoutinsafari
 	xor a
@@ -201,7 +202,7 @@ DisplayPlayerBlackedOutText::
 	ld [wSafariSteps], a
 	ld [wSafariSteps + 1], a
 	EventFlagAddressA EVENT_IN_SAFARI_ZONE
-	ld [wcf0d], a
+	ld [wNextSafariZoneGateScript], a
 	ld [wSafariZoneGateCurScript], a
 .didnotblackoutinsafari
 	jp HoldTextDisplayOpen

@@ -44,6 +44,9 @@ DEF PC_ITEM_CAPACITY  EQU 50
 	const NO_YES_MENU       ; 7
 DEF NUM_TWO_OPTION_MENUS EQU const_value
 
+; wTwoOptionMenuID
+DEF BIT_SECOND_MENU_OPTION_DEFAULT EQU 7
+
 ; menu exit method constants for list menus and the buy/sell/quit menu
 DEF CHOSE_MENU_ITEM   EQU 1 ; pressed A
 DEF CANCELLED_MENU    EQU 2 ; pressed B
@@ -87,3 +90,8 @@ DEF FIRST_PARTY_MENU_TEXT_ID EQU const_value
 	const NAME_PLAYER_SCREEN ; 0
 	const NAME_RIVAL_SCREEN  ; 1
 	const NAME_MON_SCREEN    ; 2
+
+; Stats box layout (see engine/pokemon/status_screen.asm)
+	const_def
+	const STATUS_SCREEN_STATS_BOX ; 0
+	const LEVEL_UP_STATS_BOX      ; 1

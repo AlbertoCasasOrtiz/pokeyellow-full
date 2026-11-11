@@ -43,16 +43,16 @@ GetAnimationSpeed:
 .resetSprites
 	push bc
 	ld hl, wMonPartySpritesSavedOAM
-	ld de, wOAMBuffer
-	ld bc, $60
+	ld de, wShadowOAM
+	ld bc, OBJ_SIZE * 4 * PARTY_LENGTH
 	call CopyData
 	pop bc
 	xor a
 	jr .incTimer
 .animateSprite
 	push bc
-	ld hl, wOAMBuffer + $02 ; OAM tile id
-	ld bc, $10
+	ld hl, wShadowOAMSprite00TileID
+	ld bc, OBJ_SIZE * 4
 	ld a, [wCurrentMenuItem]
 	call AddNTimes
 	ld c, ICONOFFSET
@@ -68,8 +68,8 @@ GetAnimationSpeed:
 	ld c, $1 ; amount to increase the y coord by
 ; otherwise, load a second sprite frame
 .editTileIDS
-	ld b, $4
-	ld de, $4
+	ld b, 4
+	ld de, OBJ_SIZE
 .loop
 	ld a, [hl]
 	add c
@@ -171,7 +171,7 @@ WriteMonPartySpriteOAMByPartyIndex:
 	push bc
 	ldh a, [hPartyMonIndex]
 	cp $ff
-	jr z, .asm_7191f
+	jr z, .saveSprites
 	ld hl, wPartySpecies
 	ld e, a
 	ld d, 0
@@ -185,10 +185,10 @@ WriteMonPartySpriteOAMByPartyIndex:
 	pop hl
 	ret
 
-.asm_7191f
-	ld hl, wOAMBuffer
+.saveSprites
+	ld hl, wShadowOAM
 	ld de, wMonPartySpritesSavedOAM
-	ld bc, $60
+	ld bc, OBJ_SIZE * 4 * PARTY_LENGTH
 	call CopyData
 	pop bc
 	pop de
@@ -208,9 +208,9 @@ WriteMonPartySpriteOAMBySpecies:
 UnusedPartyMonSpriteFunction:
 ; This function is unused and doesn't appear to do anything useful. It looks
 ; like it may have been intended to load the tile patterns and OAM data for
-; the mon party sprite associated with the species in [wcf91].
+; the mon party sprite associated with the species in [wCurPartySpecies].
 ; However, its calculations are off and it loads garbage data.
-	ld a, [wcf91]
+	ld a, [wCurPartySpecies]
 	call GetPartyMonSpriteID
 	push af
 	ld hl, vSprites tile $00
@@ -248,7 +248,7 @@ WriteMonPartySpriteOAM:
 ; make a copy at wMonPartySpritesSavedOAM.
 	push af
 	ld c, $10
-	ld h, HIGH(wOAMBuffer)
+	ld h, HIGH(wShadowOAM)
 	ldh a, [hPartyMonIndex]
 	swap a
 	ld l, a
@@ -264,15 +264,15 @@ WriteMonPartySpriteOAM:
 ; Make a copy of the OAM buffer with the first animation frame written so that
 ; we can flip back to it from the second frame by copying it back.
 .makeCopy
-	ld hl, wOAMBuffer
+	ld hl, wShadowOAM
 	ld de, wMonPartySpritesSavedOAM
-	ld bc, $60
+	ld bc, OBJ_SIZE * 4 * PARTY_LENGTH
 	jp CopyData
 
 GetPartyMonSpriteID:
-	ld [wd11e], a
+	ld [wPokedexNum], a
 	predef IndexToPokedex
-	ld a, [wd11e]
+	ld a, [wPokedexNum]
 	ld c, a
 	dec a
 	srl a
@@ -281,7 +281,7 @@ GetPartyMonSpriteID:
 	ld d, 0
 	add hl, de
 	ld a, [hl]
-	bit 0, c
+	bit 0, c ; even or odd?
 	jr nz, .skipSwap
 	swap a ; use lower nybble if pokedex num is even
 .skipSwap
@@ -295,13 +295,13 @@ INCLUDE "data/pokemon/menu_icons.asm"
 DEF INC_FRAME_1 EQUS "0, $20"
 DEF INC_FRAME_2 EQUS "$20, $20"
 
-BugIconFrame1:       INCBIN "gfx/icons/bug.2bpp", INC_FRAME_1
-PlantIconFrame1:     INCBIN "gfx/icons/plant.2bpp", INC_FRAME_1
-BugIconFrame2:       INCBIN "gfx/icons/bug.2bpp", INC_FRAME_2
-PlantIconFrame2:     INCBIN "gfx/icons/plant.2bpp", INC_FRAME_2
-SnakeIconFrame1:     INCBIN "gfx/icons/snake.2bpp", INC_FRAME_1
+BugIconFrame1:       INCBIN "gfx/icons/bug.2bpp",       INC_FRAME_1
+PlantIconFrame1:     INCBIN "gfx/icons/plant.2bpp",     INC_FRAME_1
+BugIconFrame2:       INCBIN "gfx/icons/bug.2bpp",       INC_FRAME_2
+PlantIconFrame2:     INCBIN "gfx/icons/plant.2bpp",     INC_FRAME_2
+SnakeIconFrame1:     INCBIN "gfx/icons/snake.2bpp",     INC_FRAME_1
 QuadrupedIconFrame1: INCBIN "gfx/icons/quadruped.2bpp", INC_FRAME_1
-SnakeIconFrame2:     INCBIN "gfx/icons/snake.2bpp", INC_FRAME_2
+SnakeIconFrame2:     INCBIN "gfx/icons/snake.2bpp",     INC_FRAME_2
 QuadrupedIconFrame2: INCBIN "gfx/icons/quadruped.2bpp", INC_FRAME_2
 
 TradeBubbleIconGFX:  INCBIN "gfx/trade/bubble.2bpp"

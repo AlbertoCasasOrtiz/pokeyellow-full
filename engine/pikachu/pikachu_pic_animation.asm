@@ -39,53 +39,53 @@ PikaPicAnimationScriptPointerLookupTable:
 ; First byte: happiness threshold
 ; Remaining bytes: loaded based on Pikachu's mood
 	db 50
-	dpikapic PikaPicAnimScript14
-	dpikapic PikaPicAnimScript14
-	dpikapic PikaPicAnimScript6
-	dpikapic PikaPicAnimScript13
-	dpikapic PikaPicAnimScript13
+	dpikapic PikaPicAnimScript_AngryBolt
+	dpikapic PikaPicAnimScript_AngryBolt
+	dpikapic PikaPicAnimScript_SideBlink
+	dpikapic PikaPicAnimScript_Side
+	dpikapic PikaPicAnimScript_Side
 
 	db 100
-	dpikapic PikaPicAnimScript9
-	dpikapic PikaPicAnimScript9
-	dpikapic PikaPicAnimScript5
-	dpikapic PikaPicAnimScript12
-	dpikapic PikaPicAnimScript12
+	dpikapic PikaPicAnimScript_BackTurn
+	dpikapic PikaPicAnimScript_BackTurn
+	dpikapic PikaPicAnimScript_Sad
+	dpikapic PikaPicAnimScript_Bored
+	dpikapic PikaPicAnimScript_Bored
 
 	db 130
-	dpikapic PikaPicAnimScript3
-	dpikapic PikaPicAnimScript3
-	dpikapic PikaPicAnimScript1
-	dpikapic PikaPicAnimScript8
-	dpikapic PikaPicAnimScript8
+	dpikapic PikaPicAnimScript_EarTwitch
+	dpikapic PikaPicAnimScript_EarTwitch
+	dpikapic PikaPicAnimScript_Blink2
+	dpikapic PikaPicAnimScript_Smile
+	dpikapic PikaPicAnimScript_Smile
 
 	db 160
-	dpikapic PikaPicAnimScript3
-	dpikapic PikaPicAnimScript3
-	dpikapic PikaPicAnimScript4
-	dpikapic PikaPicAnimScript15
-	dpikapic PikaPicAnimScript15
+	dpikapic PikaPicAnimScript_EarTwitch
+	dpikapic PikaPicAnimScript_EarTwitch
+	dpikapic PikaPicAnimScript_Happy
+	dpikapic PikaPicAnimScript_FistPump
+	dpikapic PikaPicAnimScript_FistPump
 
 	db 200
-	dpikapic PikaPicAnimScript17
-	dpikapic PikaPicAnimScript17
-	dpikapic PikaPicAnimScript7
-	dpikapic PikaPicAnimScript2
-	dpikapic PikaPicAnimScript2
+	dpikapic PikaPicAnimScript_Mad
+	dpikapic PikaPicAnimScript_Mad
+	dpikapic PikaPicAnimScript_Jump
+	dpikapic PikaPicAnimScript_Excited
+	dpikapic PikaPicAnimScript_Excited
 
 	db 250
-	dpikapic PikaPicAnimScript17
-	dpikapic PikaPicAnimScript17
-	dpikapic PikaPicAnimScript16
-	dpikapic PikaPicAnimScript10
-	dpikapic PikaPicAnimScript10
+	dpikapic PikaPicAnimScript_Mad
+	dpikapic PikaPicAnimScript_Mad
+	dpikapic PikaPicAnimScript_Heart
+	dpikapic PikaPicAnimScript_Joy
+	dpikapic PikaPicAnimScript_Joy
 
 	db 255
-	dpikapic PikaPicAnimScript17
-	dpikapic PikaPicAnimScript17
-	dpikapic PikaPicAnimScript19
-	dpikapic PikaPicAnimScript20
-	dpikapic PikaPicAnimScript20
+	dpikapic PikaPicAnimScript_Mad
+	dpikapic PikaPicAnimScript_Mad
+	dpikapic PikaPicAnimScript_2Hearts
+	dpikapic PikaPicAnimScript_Love
+	dpikapic PikaPicAnimScript_Love
 
 StarterPikachuEmotionCommand_pikapic:
 	ldh a, [hAutoBGTransferEnabled]
@@ -169,45 +169,45 @@ MACRO pikapic_def
 ENDM
 
 PikaPicAnimPointers:
-	pikapic_def PikaPicAnimScript0  ; 00
-	pikapic_def PikaPicAnimScript1  ; 01
-	pikapic_def PikaPicAnimScript2  ; 02
-	pikapic_def PikaPicAnimScript3  ; 03
-	pikapic_def PikaPicAnimScript4  ; 04
-	pikapic_def PikaPicAnimScript5  ; 05
-	pikapic_def PikaPicAnimScript6  ; 06
-	pikapic_def PikaPicAnimScript7  ; 07
-	pikapic_def PikaPicAnimScript8  ; 08
-	pikapic_def PikaPicAnimScript9  ; 09
-	pikapic_def PikaPicAnimScript10 ; 0a
-	pikapic_def PikaPicAnimScript11 ; 0b
-	pikapic_def PikaPicAnimScript12 ; 0c
-	pikapic_def PikaPicAnimScript13 ; 0d
-	pikapic_def PikaPicAnimScript14 ; 0e
-	pikapic_def PikaPicAnimScript15 ; 0f
-	pikapic_def PikaPicAnimScript16 ; 10
-	pikapic_def PikaPicAnimScript17 ; 11
-	pikapic_def PikaPicAnimScript18 ; 12
-	pikapic_def PikaPicAnimScript19 ; 13
-	pikapic_def PikaPicAnimScript20 ; 14
-	pikapic_def PikaPicAnimScript21 ; 15
-	pikapic_def PikaPicAnimScript22 ; 16
-	pikapic_def PikaPicAnimScript23 ; 17
-	pikapic_def PikaPicAnimScript24 ; 18
-	pikapic_def PikaPicAnimScript25 ; 19
-	pikapic_def PikaPicAnimScript26 ; 1a
-	pikapic_def PikaPicAnimScript27 ; 1b
-	pikapic_def PikaPicAnimScript28 ; 1c
-	pikapic_def PikaPicAnimScript29 ; 1d
+	pikapic_def PikaPicAnimScript_Blink1        ; 00, unused
+	pikapic_def PikaPicAnimScript_Blink2        ; 01
+	pikapic_def PikaPicAnimScript_Excited       ; 02
+	pikapic_def PikaPicAnimScript_EarTwitch     ; 03
+	pikapic_def PikaPicAnimScript_Happy         ; 04
+	pikapic_def PikaPicAnimScript_Sad           ; 05
+	pikapic_def PikaPicAnimScript_SideBlink     ; 06
+	pikapic_def PikaPicAnimScript_Jump          ; 07
+	pikapic_def PikaPicAnimScript_Smile         ; 08
+	pikapic_def PikaPicAnimScript_BackTurn      ; 09
+	pikapic_def PikaPicAnimScript_Joy           ; 0a
+	pikapic_def PikaPicAnimScript_Sleep         ; 0b
+	pikapic_def PikaPicAnimScript_Bored         ; 0c
+	pikapic_def PikaPicAnimScript_Side          ; 0d
+	pikapic_def PikaPicAnimScript_AngryBolt     ; 0e
+	pikapic_def PikaPicAnimScript_FistPump      ; 0f
+	pikapic_def PikaPicAnimScript_Heart         ; 10
+	pikapic_def PikaPicAnimScript_Mad           ; 11
+	pikapic_def PikaPicAnimScript_Wink          ; 12
+	pikapic_def PikaPicAnimScript_2Hearts       ; 13
+	pikapic_def PikaPicAnimScript_Love          ; 14
+	pikapic_def PikaPicAnimScript_Bucket        ; 15
+	pikapic_def PikaPicAnimScript_Scared        ; 16
+	pikapic_def PikaPicAnimScript_Confused      ; 17
+	pikapic_def PikaPicAnimScript_HeadShake     ; 18
+	pikapic_def PikaPicAnimScript_Lightning     ; 19
+	pikapic_def PikaPicAnimScript_WakeUp        ; 1a
+	pikapic_def PikaPicAnimScript_Surprised     ; 1b
+	pikapic_def PikaPicAnimScript_Cry           ; 1c
+	pikapic_def PikaPicAnimScript_Blink3        ; 1d, unused
 
 ExecutePikaPicAnimScript:
 .loop
 	xor a
 	ldh [hAutoBGTransferEnabled], a
 	call RunPikaPicAnimSetupScript
-	call DummyFunction_fdad5
+	call PikaPicAnimDummyFunction
 	call AnimateCurrentPikaPicAnimFrame
-	call DummyFunction_fdad5
+	call PikaPicAnimDummyFunction
 	ld a, $1
 	ldh [hAutoBGTransferEnabled], a
 	call PikaPicAnimTimerAndJoypad
@@ -222,7 +222,7 @@ PikaPicAnimTimerAndJoypad:
 	ret nz
 	call JoypadLowSensitivity
 	ldh a, [hJoyPressed]
-	and A_BUTTON | B_BUTTON
+	and PAD_A | PAD_B
 	ret
 
 CheckPikaPicAnimTimer:
@@ -242,7 +242,7 @@ CheckPikaPicAnimTimer:
 	ld a, $1
 	ret
 
-DummyFunction_fdad5:
+PikaPicAnimDummyFunction:
 	ret
 
 AnimateCurrentPikaPicAnimFrame:
@@ -665,13 +665,13 @@ DecompressRequestPikaPicAnimGFX:
 	jr c, .failed
 	ld a, b
 	call UncompressSpriteFromDE
-	ld a, BANK(sSpriteBuffer1)
-	call SwitchSRAMBankAndLatchClockData
+	ld a, BANK("Sprite Buffers")
+	call OpenSRAM
 	ld hl, sSpriteBuffer1
 	ld de, sSpriteBuffer0
 	ld bc, SPRITEBUFFERSIZE * 2
 	call CopyData
-	call PrepareRTCDataAndDisableSRAM
+	call CloseSRAM
 	ld a, [wPikaPicAnimCurGraphicID]
 	call LookUpTileOffsetForCurrentPikaPicAnimGFX
 	call GetPikaPicVRAMAddressForNewGFX
@@ -845,7 +845,7 @@ PikaPicAnimCommand_thunderbolt:
 .UpdatePal:
 	ld a, b
 	ldh [rBGP], a
-	call UpdateGBCPal_BGP
+	call UpdateCGBPal_BGP
 	call DelayFrames
 	ret
 

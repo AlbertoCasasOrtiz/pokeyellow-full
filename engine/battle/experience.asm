@@ -21,7 +21,7 @@ GainExperience:
 	and a ; is mon's gain exp flag set?
 	pop hl
 	jp z, .nextMon ; if mon's gain exp flag not set, go to next mon
-	ld de, (wPartyMon1HPExp + 1) - (wPartyMon1HP + 1)
+	ld de, (MON_HP_EXP + 1) - (MON_HP + 1)
 	add hl, de
 	ld d, h
 	ld e, l
@@ -66,9 +66,9 @@ GainExperience:
 	ldh [hDivisor], a
 	ld b, 4
 	call Divide
-	ld hl, wPartyMon1OTID - (wPartyMon1DVs - 1)
+	ld hl, MON_OTID - (MON_DVS - 1)
 	add hl, de
-	ld b, [hl] ; party mon OTID
+	ld b, [hl] ; wPartyMon*OTID
 	inc hl
 	ld a, [wPlayerID]
 	cp b
@@ -113,8 +113,8 @@ GainExperience:
 	ld b, 0
 	ld hl, wPartySpecies
 	add hl, bc
-	ld a, [hl] ; species
-	ld [wd0b5], a
+	ld a, [hl]
+	ld [wCurSpecies], a
 	call GetMonHeader
 	ld d, MAX_LEVEL
 	callfar CalcExperience ; get max exp
@@ -152,7 +152,7 @@ GainExperience:
 	ld [wMonDataLocation], a
 	call LoadMonData
 	pop hl
-	ld bc, wPartyMon1Level - wPartyMon1Exp
+	ld bc, MON_LEVEL - MON_EXP
 	add hl, bc
 	push hl
 	farcall CalcLevelFromExperience
@@ -160,19 +160,19 @@ GainExperience:
 	ld a, [hl] ; current level
 	cp d
 	jp z, .nextMon ; if level didn't change, go to next mon
-	ld a, [wCurEnemyLVL]
+	ld a, [wCurEnemyLevel]
 	push af
 	push hl
 	ld a, d
-	ld [wCurEnemyLVL], a
+	ld [wCurEnemyLevel], a
 	ld [hl], a
-	ld bc, wPartyMon1Species - wPartyMon1Level
+	ld bc, MON_SPECIES - MON_LEVEL
 	add hl, bc
-	ld a, [hl] ; species
-	ld [wd0b5], a
-	ld [wd11e], a
+	ld a, [hl]
+	ld [wCurSpecies], a
+	ld [wPokedexNum], a
 	call GetMonHeader
-	ld bc, (wPartyMon1MaxHP + 1) - wPartyMon1Species
+	ld bc, (MON_MAXHP + 1) - MON_SPECIES
 	add hl, bc
 	push hl
 	ld a, [hld]
@@ -181,7 +181,7 @@ GainExperience:
 	push bc ; push max HP (from before levelling up)
 	ld d, h
 	ld e, l
-	ld bc, (wPartyMon1HPExp - 1) - wPartyMon1MaxHP
+	ld bc, (MON_HP_EXP - 1) - MON_MAXHP
 	add hl, bc
 	ld b, $1 ; consider stat exp when calculating stats
 	call CalcStats
@@ -193,15 +193,15 @@ GainExperience:
 	ld a, [hl]
 	sbc b
 	ld b, a ; bc = difference between old max HP and new max HP after levelling
-	ld de, (wPartyMon1HP + 1) - wPartyMon1MaxHP
+	ld de, (MON_HP + 1) - MON_MAXHP
 	add hl, de
 ; add to the current HP the amount of max HP gained when levelling
-	ld a, [hl] ; wPartyMon1HP + 1
+	ld a, [hl] ; wPartyMon*HP + 1
 	add c
 	ld [hld], a
-	ld a, [hl] ; wPartyMon1HP + 1
+	ld a, [hl] ; wPartyMon*HP + 1
 	adc b
-	ld [hl], a ; wPartyMon1HP
+	ld [hl], a ; wPartyMon*HP
 	ld a, [wPlayerMonNumber]
 	ld b, a
 	ld a, [wWhichPokemon]
@@ -216,7 +216,7 @@ GainExperience:
 	ld a, [hl]
 	ld [de], a
 ; copy other stats from party mon to battle mon
-	ld bc, wPartyMon1Level - (wPartyMon1HP + 1)
+	ld bc, MON_LEVEL - (MON_HP + 1)
 	add hl, bc
 	push hl
 	ld de, wBattleMonLevel
@@ -224,7 +224,7 @@ GainExperience:
 	call CopyData
 	pop hl
 	ld a, [wPlayerBattleStatus3]
-	bit 3, a ; is the mon transformed?
+	bit TRANSFORMED, a
 	jr nz, .recalcStatChanges
 ; the mon is not transformed, so update the unmodified stats
 	ld de, wPlayerMonUnmodifiedLevel
@@ -245,20 +245,20 @@ GainExperience:
 	call CallBattleCore
 	call SaveScreenTilesToBuffer1
 .printGrewLevelText
-	callabd_ModifyPikachuHappiness PIKAHAPPY_LEVELUP
+	farcall_ModifyPikachuHappiness PIKAHAPPY_LEVELUP
 	ld hl, GrewLevelText
 	call PrintText
 	xor a ; PLAYER_PARTY_DATA
 	ld [wMonDataLocation], a
 	call LoadMonData
-	ld d, $1
+	ld d, LEVEL_UP_STATS_BOX
 	callfar PrintStatsBox
 	call WaitForTextScrollButtonPress
 	call LoadScreenTilesFromBuffer1
 	xor a ; PLAYER_PARTY_DATA
 	ld [wMonDataLocation], a
-	ld a, [wd0b5]
-	ld [wd11e], a
+	ld a, [wCurSpecies]
+	ld [wPokedexNum], a
 	predef LearnMoveFromLevelUp
 	ld hl, wCanEvolveFlags
 	ld a, [wWhichPokemon]
@@ -267,7 +267,7 @@ GainExperience:
 	predef FlagActionPredef
 	pop hl
 	pop af
-	ld [wCurEnemyLVL], a
+	ld [wCurEnemyLevel], a
 
 .nextMon
 	ld a, [wPartyCount]
@@ -277,7 +277,7 @@ GainExperience:
 	cp b
 	jr z, .done
 	ld [wWhichPokemon], a
-	ld bc, wPartyMon2 - wPartyMon1
+	ld bc, PARTYMON_STRUCT_LENGTH
 	ld hl, wPartyMon1
 	call AddNTimes
 	jp .partyMonLoop
@@ -312,7 +312,7 @@ DivideExpDataByNumMonsGainingExp:
 	jr nz, .countSetBitsLoop
 	cp $2
 	ret c ; return if only one mon is gaining exp
-	ld [wd11e], a ; store number of mons gaining exp
+	ld [wTempByteValue], a ; store number of mons gaining exp
 	ld hl, wEnemyMonBaseStats
 	ld c, wEnemyMonBaseExp + 1 - wEnemyMonBaseStats
 .divideLoop
@@ -320,7 +320,7 @@ DivideExpDataByNumMonsGainingExp:
 	ldh [hDividend], a
 	ld a, [hl]
 	ldh [hDividend + 1], a
-	ld a, [wd11e]
+	ld a, [wTempByteValue]
 	ldh [hDivisor], a
 	ld b, $2
 	call Divide ; divide value by number of mons gaining exp
