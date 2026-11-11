@@ -54,7 +54,11 @@ _VermilionCitySailor1YouNeedATicketText::
 	done
 
 _VermilionCitySailor1ShipSetSailText::
-	text "The ship set sail."
+	text "The ship came"
+	line "back!"
+
+	para "There was a"
+	line "technical issue."
 	done
 
 _VermilionCityGambler2Text::

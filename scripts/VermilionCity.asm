@@ -74,14 +74,15 @@ VermilionCityDefaultScript:
 	and a
 	ret nz
 .ship_departed
-	ld a, PAD_UP
-	ld [wSimulatedJoypadStatesEnd], a
-	ld a, $1
-	ld [wSimulatedJoypadStatesIndex], a
-	call StartSimulatingJoypadStates
-	ld a, SCRIPT_VERMILIONCITY_PLAYER_MOVING_UP1
-	ld [wVermilionCityCurScript], a
 	ret
+	;ld a, PAD_UP
+	;ld [wSimulatedJoypadStatesEnd], a
+	;ld a, $1
+	;ld [wSimulatedJoypadStatesIndex], a
+	;call StartSimulatingJoypadStates
+	;ld a, SCRIPT_VERMILIONCITY_PLAYER_MOVING_UP1
+	;ld [wVermilionCityCurScript], a
+	;ret
 
 .return
 	ret
@@ -208,6 +209,9 @@ VermilionCitySailor1Text:
 .ship_departed
 	ld hl, .ShipSetSailText
 	call PrintText
+	ld a, SCRIPT_VERMILIONCITY_PLAYER_ALLOWED_TO_PASS
+	ld [wVermilionCityCurScript], a
+	jr .end
 .end
 	jp TextScriptEnd
 
