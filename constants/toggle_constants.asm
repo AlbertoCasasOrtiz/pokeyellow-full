@@ -405,4 +405,7 @@ ENDM
 	const TOGGLE_DAISY_WALKING_COPY            ; ED
 	const TOGGLE_TOWN_MAP_COPY                 ; EE
 
+	toggle_consts_for VERMILION_DOCK
+	const TOGGLE_VERMILION_DOCK_MEW            ; EF
+
 DEF NUM_TOGGLEABLE_OBJECTS EQU const_value

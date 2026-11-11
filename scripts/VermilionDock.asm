@@ -1,5 +1,25 @@
+
 VermilionDock_Script:
 	call EnableAutoTextBoxDrawing
+	ld hl, VermilionDockTrainerHeaders
+	ld de, VermilionDock_ScriptPointers
+	ld a, [wVermilionDockCurScript]
+	call ExecuteCurMapScriptInTable
+	ld [wVermilionDockCurScript], a
+	ret
+
+VermilionDock_ScriptPointers:
+	def_script_pointers
+	dw_const VermilionDock_DefaultScript, SCRIPT_VERMILIONDOCK_DEFAULT
+	dw_const DisplayEnemyTrainerTextAndStartBattle, SCRIPT_VERMILIONDOCK_START_BATTLE
+	dw_const EndTrainerBattle, SCRIPT_VERMILIONDOCK_END_BATTLE
+
+VermilionDock_DefaultScript:
+	call CheckFightingMapTrainers
+	ld a, [wCurMapScript]
+	and a
+	ret nz
+
 	CheckEventHL EVENT_STARTED_WALKING_OUT_OF_DOCK
 	jr nz, .walking_out_of_dock
 	CheckEventReuseHL EVENT_GOT_HM01
@@ -26,6 +46,7 @@ VermilionDock_Script:
 	dec a
 	ld [wJoyIgnore], a
 	ret
+
 .walking_out_of_dock
 	CheckEventAfterBranchReuseHL EVENT_WALKED_OUT_OF_DOCK, EVENT_STARTED_WALKING_OUT_OF_DOCK
 	ret nz
@@ -210,8 +231,24 @@ VermilionDock_EraseSSAnne:
 
 VermilionDock_TextPointers:
 	def_text_pointers
-	dw_const VermilionDockUnusedText, TEXT_VERMILIONDOCK_UNUSED
+	dw_const VermilionDockMewText, TEXT_VERMILIONDOCK_MEW
 
-VermilionDockUnusedText:
-	text_far _VermilionDockUnusedText
-	text_end
+VermilionDockTrainerHeaders:
+	def_trainers
+MewTrainerHeader:
+	trainer EVENT_BEAT_MEW, 0, MewBattleText, MewBattleText, MewBattleText
+	db -1 ; end
+
+VermilionDockMewText:
+	text_asm
+	ld hl, MewTrainerHeader
+	call TalkToTrainer
+	jp TextScriptEnd
+
+MewBattleText:
+	text_far _MewBattleText
+	text_asm
+	ld a, MEW
+	call PlayCry
+	call WaitForSoundToFinish
+	jp TextScriptEnd

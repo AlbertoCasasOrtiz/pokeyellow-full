@@ -122,6 +122,8 @@
 	const_skip
 	const EVENT_GOT_TM24
 	const EVENT_BEAT_LT_SURGE
+    const_skip
+	const EVENT_BEAT_MEW
 
 ; Celadon City events
 	const_next $180
@@ -728,8 +730,8 @@
 
 ; Cerulean Cave events
 	const_next $8C0
-	const_skip
-	const EVENT_BEAT_MEWTWO
+    const_skip
+    const EVENT_BEAT_MEWTWO
 
 ; Indigo Plateau events
 	const_next $8E0
