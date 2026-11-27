@@ -30,7 +30,7 @@ PokedexEntryPointers:
 	dw BlastoiseDexEntry
 	dw PinsirDexEntry
 	dw TangelaDexEntry
-	dw MissingNoDexEntry
+	dw PikabluDexEntry
 	dw MissingNoDexEntry
 	dw GrowlitheDexEntry
 	dw OnixDexEntry
@@ -1252,6 +1252,13 @@ MewDexEntry:
 	db 1,4
 	dw 90
 	text_far _MewDexEntry
+	text_end
+
+PikabluDexEntry:
+	db "AQUA MOUSE@"
+	db 1,4
+	dw 187
+	text_far _PikabluDexEntry
 	text_end
 
 MissingNoDexEntry:

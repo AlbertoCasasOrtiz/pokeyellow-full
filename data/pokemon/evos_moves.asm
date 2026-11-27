@@ -40,7 +40,7 @@ EvosMovesPointerTable:
 	dw BlastoiseEvosMoves
 	dw PinsirEvosMoves
 	dw TangelaEvosMoves
-	dw MissingNo1FEvosMoves
+	dw PikabluEvosMoves
 	dw MissingNo20EvosMoves
 	dw GrowlitheEvosMoves
 	dw OnixEvosMoves
@@ -2167,4 +2167,17 @@ VictreebelEvosMoves:
 	db 13, WRAP
 	db 15, POISONPOWDER
 	db 18, SLEEP_POWDER
+	db 0
+
+
+PikabluEvosMoves:
+; Evolutions
+	db 0
+; Learnset
+	db 1, TAIL_WHIP
+	db 10, BUBBLE
+	db 15, WATER_GUN
+	db 20, DEFENSE_CURL
+	db 30, BODY_SLAM
+	db 40, HYDRO_PUMP
 	db 0

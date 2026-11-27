@@ -72,16 +72,16 @@ ROMX $9
 	"Pics 1"
 	"Battle Engine 3"
 ROMX $A
-	"Pics 2"
-	"Battle Engine 4"
+     "Pics 2"
 ROMX $B
-	"Pics 3"
-	"Battle Engine 5"
+     "Pics 3"
+     "Battle Engine 5"
 ROMX $C
-	"Pics 4"
+     "Pics 4"
 ROMX $D
-	"Pics 5"
-	"Slot Machines"
+     "Pics 5"
+     "Slot Machines"
+     "Battle Engine 4"
 ROMX $E
 	"Battle Engine 6"
 ROMX $F

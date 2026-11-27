@@ -1506,3 +1506,13 @@ _MewDexEntry::
 	next "fine, delicate"
 	next "hair can be seen"
 	dex
+
+_PikabluDexEntry::
+	text "Its blue fur"
+	next "repels water."
+	next "It swims by"
+
+	page "using its tail"
+	next "as a flotation"
+	next "device"
+	dex

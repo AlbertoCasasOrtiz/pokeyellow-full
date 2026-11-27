@@ -25,7 +25,7 @@ To set up the repository, see [**INSTALL.md**](INSTALL.md).
     - **Jynx** appearing in Sea Foam Islands 1F.
     - **Eevee** appearing in Route 25 (So you can get three and evolve into **Vaporeon**, **Jolteon** and **Flareon**).
     - You can get both, **Hitmonchan** and **Hitmonlee**, after defeating the Fighting Dojo.
-    - **Mew** obtained as a gift instead of Eevee in Celadon Mansion.
+    - **Pikablu** obtained as a gift instead of Eevee in Celadon Mansion.
     - **Mew** now appears in the docks of Vermillion City. You can re-enter now.
     - Kadabra evolves into **Alakazam** at level 35.
     - Graveler evolves into **Golem** at level 45.

@@ -61,7 +61,6 @@ PinsirPicBack::       INCBIN "gfx/pokemon/back/pinsirb.pic"
 TangelaPicFront::     INCBIN "gfx/pokemon/front/tangela.pic"
 TangelaPicBack::      INCBIN "gfx/pokemon/back/tangelab.pic"
 
-
 SECTION "Pics 2", ROMX
 
 GrowlithePicFront::   INCBIN "gfx/pokemon/front/growlithe.pic"
@@ -128,6 +127,8 @@ JynxPicFront::        INCBIN "gfx/pokemon/front/jynx.pic"
 JynxPicBack::         INCBIN "gfx/pokemon/back/jynxb.pic"
 MoltresPicFront::     INCBIN "gfx/pokemon/front/moltres.pic"
 MoltresPicBack::      INCBIN "gfx/pokemon/back/moltresb.pic"
+PikabluPicFront::     INCBIN "gfx/pokemon/front/pikablu.pic"
+PikabluPicBack::      INCBIN "gfx/pokemon/back/pikablub.pic"
 
 
 SECTION "Pics 3", ROMX
